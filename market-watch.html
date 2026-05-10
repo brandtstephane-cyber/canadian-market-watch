@@ -310,36 +310,6 @@ body {
 
 <div class="toast" id="toast"></div>
 
-<!-- SETUP -->
-<div class="view active" id="view-setup">
-  <div class="setup-wrap">
-    <div class="setup-card">
-      <div class="setup-logo">
-        <div class="setup-logo-icon">🍁</div>
-        <div class="setup-title">Bienvenue</div>
-      </div>
-      <div class="setup-sub">Configure l'app une seule fois. Tes paramètres sont sauvegardés sur cet appareil.</div>
-      <div class="form-group">
-        <label class="form-label">Clé API Anthropic *</label>
-        <input type="password" class="form-input mono" id="setup-apikey" placeholder="sk-ant-api03-...">
-        <div class="form-hint">Sur <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
-      </div>
-      <hr class="divider">
-      <div class="setup-sub" style="margin-bottom:1rem">Optionnel : Firebase pour synchroniser l'historique entre appareils.</div>
-      <div class="form-group">
-        <label class="form-label">Firebase API Key</label>
-        <input type="text" class="form-input mono" id="setup-fbkey" placeholder="AIza...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Firebase Project ID</label>
-        <input type="text" class="form-input" id="setup-fbproject" placeholder="mon-projet">
-        <div class="form-hint">Laisse vide pour historique local uniquement.</div>
-      </div>
-      <button class="btn-primary" onclick="saveSetup()">✅ Démarrer</button>
-    </div>
-  </div>
-</div>
-
 <!-- JOURNAL -->
 <div class="view" id="view-journal">
   <div class="journal-hero">
@@ -440,12 +410,10 @@ let db = null;
 
 // ── INIT ──
 function init() {
-  CONFIG = JSON.parse(localStorage.getItem("mw_config") || "{}");
+  CONFIG = { useProxy: true };
   const count = localStorage.getItem("mw_count") || "15";
   const countEl = document.getElementById("s-count");
   if (countEl) countEl.value = count;
-  // Toujours démarrer directement — clé gérée côté serveur via /api/generate
-  CONFIG.useProxy = true;
   startApp();
 }
 
@@ -637,15 +605,7 @@ document.querySelectorAll(".fchip").forEach(b=>b.addEventListener("click",()=>{
 }));
 
 // ── SETUP & SETTINGS ──
-window.saveSetup = function() {
-  const apiKey = document.getElementById("setup-apikey").value.trim();
-  if (!apiKey) { showToast("❌ Clé API requise"); return; }
-  CONFIG = { apiKey, fbKey: document.getElementById("setup-fbkey").value.trim(), fbProject: document.getElementById("setup-fbproject").value.trim(), useProxy: true };
-  localStorage.setItem("mw_config", JSON.stringify(CONFIG));
-  startApp();
-  if (CONFIG.fbKey && CONFIG.fbProject) initFirebase();
-  showToast("✅ Configuration sauvegardée");
-};
+// Setup supprimé - clé gérée côté serveur
 
 window.changeApiKey = function() { const k=prompt("Nouvelle clé API :",""); if(k?.trim()){CONFIG.apiKey=k.trim();localStorage.setItem("mw_config",JSON.stringify(CONFIG));updateSettingsDisplay();showToast("✅ Clé mise à jour");} };
 window.clearHistory = function() { if(confirm("Effacer l'historique local ?")){localStorage.removeItem("mw_history");localStorage.removeItem("mw_last");renderHistory();showToast("🗑 Effacé");} };
