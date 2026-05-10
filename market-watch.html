@@ -567,9 +567,15 @@ function renderEdition(ed) {
   renderCards();
 }
 
-function getImageUrl(product) {
-  const query = encodeURIComponent(product.image_query || product.titre || "food product");
-  return `https://source.unsplash.com/600x300/?${query}`;
+function getImageUrl(product, index) {
+  const query = (product.image_query || product.titre || "food snack")
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, "")
+    .trim()
+    .split(" ")
+    .slice(0, 3)
+    .join(",");
+  return `https://loremflickr.com/600/300/${encodeURIComponent(query)}?lock=${index || 0}`;
 }
 
 function renderCards() {
@@ -579,7 +585,7 @@ function renderCards() {
   document.getElementById("journalEmpty").style.display = "none";
   el.innerHTML = list.map((p,i) => {
     const cat = (p.categorie||"général").toLowerCase();
-    const imgUrl = getImageUrl(p);
+    const imgUrl = getImageUrl(p, i);
     const shareText = encodeURIComponent(`🍁 ${p.titre} — ${p.marque}\n${p.description}\n\nVia Canadian American Market`);
     return `<div class="card" style="animation-delay:${Math.min(i*0.05,0.3)}s">
       <div class="card-img-wrap">
