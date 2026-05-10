@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#B22222">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Market Watch — Canadian American Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #B22222;
+  --red-dark: #8B0000;
+  --red-light: #f9eded;
+  --black: #111;
+  --gray-700: #444;
+  --gray-500: #777;
+  --gray-300: #ccc;
+  --gray-100: #f5f5f5;
+  --white: #fff;
+  --border: 1px solid #e0e0e0;
+  --radius: 8px;
+  --font-d: 'Playfair Display', Georgia, serif;
+  --font-b: 'Source Sans 3', system-ui, sans-serif;
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-b); background: #f0ede8; color: var(--black); min-height: 100vh; }
+
+/* TOPBAR */
+.topbar {
+  background: var(--red); color: white;
+  padding: 0 1rem; height: 54px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.topbar-logo { font-family: var(--font-d); font-size: 16px; font-weight: 700; line-height: 1.2; }
+.topbar-logo small { display: block; font-family: var(--font-b); font-size: 10px; font-weight: 300; opacity: 0.75; letter-spacing: 1.5px; text-transform: uppercase; }
+.topbar-right { display: flex; gap: 6px; }
+.icon-btn {
+  background: rgba(255,255,255,0.15); border: none; color: white;
+  width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+  font-size: 17px; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.28); }
+
+/* TABS */
+.tabs {
+  display: flex; background: white; border-bottom: var(--border);
+  padding: 0 1rem; position: sticky; top: 54px; z-index: 99;
+}
+.tab-btn {
+  padding: 12px 16px; border: none; background: transparent;
+  font-family: var(--font-b); font-size: 13px; font-weight: 500;
+  color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; transition: all 0.15s; white-space: nowrap;
+}
+.tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── SETUP ── */
+.setup-wrap { max-width: 480px; margin: 2rem auto; padding: 0 1rem 2rem; }
+.setup-card { background: white; border-radius: 14px; padding: 1.75rem; box-shadow: var(--shadow); }
+.setup-title { font-family: var(--font-d); font-size: 22px; color: var(--red); margin-bottom: 0.4rem; }
+.setup-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 1.5rem; line-height: 1.6; }
+.form-group { margin-bottom: 1.1rem; }
+.form-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray-700); margin-bottom: 5px; }
+.form-input {
+  width: 100%; padding: 9px 12px; border: var(--border); border-radius: var(--radius);
+  font-size: 14px; font-family: var(--font-b); background: var(--gray-100); transition: border-color 0.15s;
+}
+.form-input:focus { outline: none; border-color: var(--red); background: white; }
+.form-input.mono { font-family: monospace; font-size: 12px; }
+.form-hint { font-size: 11px; color: var(--gray-500); margin-top: 4px; line-height: 1.5; }
+.form-hint a { color: var(--red); }
+.btn-primary {
+  width: 100%; padding: 12px; background: var(--red); color: white; border: none;
+  border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: var(--font-b); transition: background 0.15s; margin-top: 0.5rem;
+}
+.btn-primary:hover { background: var(--red-dark); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.setup-divider { border: none; border-top: var(--border); margin: 1.25rem 0; }
+
+/* ── JOURNAL ── */
+.journal-header {
+  background: white; padding: 1rem; border-bottom: var(--border);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.journal-meta { flex: 1; min-width: 0; }
+.journal-edition { font-size: 11px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+.journal-title { font-family: var(--font-d); font-size: 16px; font-weight: 600; margin-top: 1px; }
+.journal-count { font-size: 11px; background: var(--red-light); color: var(--red); padding: 2px 8px; border-radius: 20px; font-weight: 600; display: inline-block; margin-top: 3px; }
+.gen-btn {
+  display: flex; align-items: center; gap: 6px; padding: 9px 18px;
+  background: var(--red); color: white; border: none; border-radius: 24px;
+  font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-b);
+  transition: background 0.15s; white-space: nowrap; flex-shrink: 0;
+}
+.gen-btn:hover { background: var(--red-dark); }
+.gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.filters-bar {
+  display: flex; gap: 6px; padding: 0.7rem 1rem;
+  overflow-x: auto; background: white; border-bottom: var(--border); scrollbar-width: none;
+}
+.filters-bar::-webkit-scrollbar { display: none; }
+.f-chip {
+  padding: 4px 13px; border-radius: 20px; border: 1px solid var(--gray-300);
+  background: transparent; font-size: 12px; font-weight: 500; color: var(--gray-700);
+  cursor: pointer; white-space: nowrap; font-family: var(--font-b); transition: all 0.12s; flex-shrink: 0;
+}
+.f-chip.active { background: var(--red); color: white; border-color: var(--red); }
+
+.content-wrap { padding: 1rem; max-width: 680px; margin: 0 auto; }
+
+.empty-state { text-align: center; padding: 3rem 1rem; }
+.empty-icon { font-size: 44px; margin-bottom: 1rem; opacity: 0.2; }
+.empty-title { font-family: var(--font-d); font-size: 20px; color: var(--gray-700); margin-bottom: 0.5rem; }
+.empty-sub { font-size: 13px; color: var(--gray-500); line-height: 1.7; }
+
+.loading-state { text-align: center; padding: 3rem 1rem; }
+.loader-ring {
+  width: 38px; height: 38px; border: 3px solid var(--gray-300);
+  border-top-color: var(--red); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--gray-500); }
+.loading-sub { font-size: 12px; color: var(--gray-300); margin-top: 4px; }
+
+/* Cards */
+.cards-list { display: flex; flex-direction: column; gap: 10px; }
+.card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.card-body { padding: 1rem; }
+.card-top { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 5px; }
+.cat-pill {
+  font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; margin-top: 3px;
+}
+.cat-pill.boissons { background: #deeeff; color: #1a5a9e; }
+.cat-pill.snacks { background: #fff0d6; color: #7a4500; }
+.cat-pill.épicerie { background: #dff3e3; color: #1a6630; }
+.cat-pill.tendances { background: #f0ecff; color: #4a2d9e; }
+.card-title { font-family: var(--font-d); font-size: 15px; font-weight: 600; line-height: 1.35; }
+.card-meta { font-size: 12px; color: var(--gray-500); margin-bottom: 7px; }
+.card-desc { font-size: 13px; color: var(--gray-700); line-height: 1.6; margin-bottom: 8px; }
+.card-why {
+  background: var(--red-light); border-left: 3px solid var(--red);
+  padding: 7px 10px; border-radius: 0 6px 6px 0;
+  font-size: 12px; color: var(--red-dark); line-height: 1.5;
+}
+.card-why::before { content: "💡 "; }
+
+/* ── HISTORY ── */
+.history-wrap { padding: 1rem; max-width: 680px; margin: 0 auto; }
+.history-title { font-family: var(--font-d); font-size: 18px; font-weight: 600; margin-bottom: 1rem; }
+.history-list { display: flex; flex-direction: column; gap: 8px; }
+.history-item {
+  background: white; border-radius: 10px; padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05); cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.12s;
+}
+.history-item:hover { background: var(--gray-100); }
+.history-item-date { font-size: 11px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
+.history-item-title { font-family: var(--font-d); font-size: 15px; font-weight: 600; margin-top: 2px; }
+.history-item-count { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.history-chevron { font-size: 20px; color: var(--gray-300); }
+.history-empty { text-align: center; padding: 2.5rem 1rem; color: var(--gray-500); font-size: 14px; }
+
+/* ── SETTINGS ── */
+.settings-wrap { max-width: 480px; margin: 1.5rem auto; padding: 0 1rem 2rem; }
+.settings-section { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
+.settings-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--red); margin-bottom: 1rem; }
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: var(--border); gap: 12px;
+}
+.settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+.settings-row-label { font-size: 14px; color: var(--black); }
+.settings-row-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; }
+.btn-danger {
+  width: 100%; padding: 10px; background: transparent; color: #c00; border: 1px solid #f5c0c0;
+  border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: var(--font-b); transition: background 0.15s; margin-top: 0.5rem;
+}
+.btn-danger:hover { background: #fff0f0; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #222; color: white; padding: 10px 20px; border-radius: 24px;
+  font-size: 13px; font-weight: 500; z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  opacity: 0; pointer-events: none; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">
+    Canadian American Market
+    <small>Market Watch</small>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" onclick="showView('settings')" title="Paramètres">⚙️</button>
+  </div>
+</div>
+
+<div class="tabs" id="mainTabs" style="display:none">
+  <button class="tab-btn active" data-tab="journal" onclick="switchTab('journal')">📰 Journal</button>
+  <button class="tab-btn" data-tab="history" onclick="switchTab('history')">🗂 Historique</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SETUP -->
+<div class="view active" id="view-setup">
+  <div class="setup-wrap">
+    <div class="setup-card">
+      <div class="setup-title">🍁 Bienvenue</div>
+      <div class="setup-sub">Configure l'app une seule fois. Tes paramètres sont sauvegardés localement sur cet appareil.</div>
+
+      <div class="form-group">
+        <label class="form-label">Clé API Anthropic *</label>
+        <input type="password" class="form-input mono" id="setup-apikey" placeholder="sk-ant-api03-...">
+        <div class="form-hint">Disponible sur <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
+      </div>
+
+      <hr class="setup-divider">
+      <div class="setup-sub" style="margin-bottom:1rem">Optionnel : Firebase pour synchroniser l'historique entre tes appareils.</div>
+
+      <div class="form-group">
+        <label class="form-label">Firebase API Key</label>
+        <input type="text" class="form-input mono" id="setup-fbkey" placeholder="AIza...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Firebase Project ID</label>
+        <input type="text" class="form-input" id="setup-fbproject" placeholder="mon-projet">
+        <div class="form-hint">Laisse vide pour garder l'historique uniquement sur cet appareil.</div>
+      </div>
+
+      <button class="btn-primary" id="setupBtn" onclick="saveSetup()">✅ Démarrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOURNAL -->
+<div class="view" id="view-journal">
+  <div class="journal-header">
+    <div class="journal-meta">
+      <div class="journal-edition" id="j-edition">—</div>
+      <div class="journal-title">Canadian American Market</div>
+      <span class="journal-count" id="j-count" style="display:none"></span>
+    </div>
+    <button class="gen-btn" id="genBtn" onclick="generateJournal()">
+      🔄 Générer
+    </button>
+  </div>
+
+  <div class="filters-bar" id="filtersBar" style="display:none">
+    <button class="f-chip active" data-cat="all">Tout</button>
+    <button class="f-chip" data-cat="boissons">🍶 Boissons</button>
+    <button class="f-chip" data-cat="snacks">🍿 Snacks</button>
+    <button class="f-chip" data-cat="épicerie">🛒 Épicerie</button>
+    <button class="f-chip" data-cat="tendances">📈 Tendances</button>
+  </div>
+
+  <div class="content-wrap">
+    <div class="empty-state" id="journalEmpty">
+      <div class="empty-icon">📰</div>
+      <div class="empty-title">Aucun journal généré</div>
+      <div class="empty-sub">Appuie sur <strong>Générer</strong> pour obtenir les dernières nouveautés du marché nord-américain, sélectionnées pour tes boutiques de Vevey et Genève Eaux-Vives.</div>
+    </div>
+    <div class="loading-state" id="journalLoading" style="display:none">
+      <div class="loader-ring"></div>
+      <div class="loading-text" id="loadingText">Analyse du marché nord-américain…</div>
+      <div class="loading-sub">10 à 20 secondes</div>
+    </div>
+    <div class="cards-list" id="cardsList"></div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="view" id="view-history">
+  <div class="history-wrap">
+    <div class="history-title">Éditions précédentes</div>
+    <div id="historyList"><div class="history-empty">Aucune édition sauvegardée.</div></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="view" id="view-settings">
+  <div class="settings-wrap">
+    <div class="settings-section">
+      <div class="settings-section-title">Configuration</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Clé API Anthropic</div>
+          <div class="settings-row-sub" id="s-apikey-status">—</div>
+        </div>
+        <button class="f-chip" onclick="changeApiKey()">Modifier</button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Firebase</div>
+          <div class="settings-row-sub" id="s-firebase-status">Non connecté</div>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Magasins</div>
+          <div class="settings-row-sub">Vevey · Genève Eaux-Vives</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Génération</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Produits par journal</div>
+        </div>
+        <select class="form-input" style="width:70px;padding:5px 8px" id="s-count" onchange="saveCount()">
+          <option value="10">10</option>
+          <option value="15" selected>15</option>
+          <option value="20">20</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Données</div>
+      <button class="btn-danger" onclick="clearHistory()">🗑 Effacer l'historique local</button>
+      <button class="btn-danger" onclick="resetAll()" style="margin-top:8px;color:#888;border-color:#ddd">Réinitialiser l'app</button>
+    </div>
+
+    <div style="text-align:center;margin-top:1.5rem">
+      <button class="f-chip active" onclick="showView('journal');switchTab('journal')">← Retour</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+let CONFIG = {};
+let allProducts = [];
+let currentCat = "all";
+let db = null;
+
+// ── INIT ──────────────────────────────────
+function init() {
+  CONFIG = JSON.parse(localStorage.getItem("mw_config") || "{}");
+  const count = localStorage.getItem("mw_count") || "15";
+  const countEl = document.getElementById("s-count");
+  if (countEl) countEl.value = count;
+
+  if (!CONFIG.apiKey) {
+    showView("setup");
+  } else {
+    document.getElementById("mainTabs").style.display = "flex";
+    showView("journal");
+    updateSettingsDisplay();
+    if (CONFIG.fbKey && CONFIG.fbProject) initFirebase();
+    const last = localStorage.getItem("mw_last");
+    if (last) try { renderEdition(JSON.parse(last)); } catch(e) {}
+  }
+}
+
+// ── FIREBASE ──────────────────────────────
+async function initFirebase() {
+  try {
+    const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
+    const { getFirestore, collection, addDoc, getDocs, orderBy, query, limit } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+    const existing = getApps().find(a => a.name === "mw");
+    const app = existing || initializeApp({ apiKey: CONFIG.fbKey, projectId: CONFIG.fbProject, authDomain: `${CONFIG.fbProject}.firebaseapp.com` }, "mw");
+    db = getFirestore(app);
+    window._fb = { collection, addDoc, getDocs, orderBy, query, limit };
+    document.getElementById("s-firebase-status").textContent = CONFIG.fbProject + " ✓";
+  } catch(e) { console.warn("Firebase:", e.message); }
+}
+
+async function fbSave(ed) {
+  if (!db || !window._fb) return;
+  try { await window._fb.addDoc(window._fb.collection(db, "market_watch"), ed); } catch(e) {}
+}
+
+async function fbHistory() {
+  if (!db || !window._fb) return null;
+  try {
+    const { collection, getDocs, orderBy, query, limit } = window._fb;
+    const snap = await getDocs(query(collection(db, "market_watch"), orderBy("timestamp","desc"), limit(30)));
+    return snap.docs.map(d => d.data());
+  } catch(e) { return null; }
+}
+
+// ── LOCAL ─────────────────────────────────
+function lSave(ed) {
+  const h = JSON.parse(localStorage.getItem("mw_history") || "[]");
+  h.unshift(ed);
+  localStorage.setItem("mw_history", JSON.stringify(h.slice(0, 50)));
+  localStorage.setItem("mw_last", JSON.stringify(ed));
+}
+
+// ── GENERATE ──────────────────────────────
+window.generateJournal = async function() {
+  const btn = document.getElementById("genBtn");
+  const count = document.getElementById("s-count")?.value || localStorage.getItem("mw_count") || "15";
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.35);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px"></span>Génération…';
+
+  document.getElementById("journalEmpty").style.display = "none";
+  document.getElementById("cardsList").innerHTML = "";
+  document.getElementById("filtersBar").style.display = "none";
+  document.getElementById("journalLoading").style.display = "block";
+  document.getElementById("j-count").style.display = "none";
+
+  const loadMsgs = ["Analyse du marché nord-américain…", "Sélection des nouveautés…", "Évaluation pour Vevey & Genève…", "Finalisation du journal…"];
+  let mi = 0;
+  const ticker = setInterval(() => {
+    document.getElementById("loadingText").textContent = loadMsgs[mi++ % loadMsgs.length];
+  }, 3500);
+
+  const today = new Date().toLocaleDateString("fr-CH", { month:"long", year:"numeric" });
+
+  const prompt = `Tu es un expert en veille de marché pour les épiceries fines nord-américaines.
+
+Identifie ${count} nouveautés récentes du marché alimentaire nord-américain (2024-2025), réparties entre boissons, snacks, épicerie et tendances.
+
+Ces produits sont pour Canadian American Market, épicerie fine spécialisée dans les produits canadiens et américains avec deux boutiques en Suisse : Vevey et Genève Eaux-Vives. Clientèle : expatriés nord-américains, amateurs de culture américaine/canadienne, Suisses curieux.
+
+Critères : authenticité marquée, originalité, importable en Europe (longue conservation, sans alcool ou clairement signalé), fort potentiel de vente.
+
+Réponds UNIQUEMENT avec un JSON valide, sans backticks ni texte autour :
+{"edition":"${today}","produits":[{"titre":"Nom complet","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases factuelles en français","interet":"1 phrase : pourquoi pertinent pour Vevey ou Genève"}]}`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": CONFIG.apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 3500,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    clearInterval(ticker);
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `Erreur ${res.status}`);
+    }
+
+    const data = await res.json();
+    let raw = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim();
+    raw = raw.replace(/```json|```/g, "").trim();
+
+    // Extract JSON if wrapped in text
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("Réponse JSON invalide");
+    const parsed = JSON.parse(match[0]);
+
+    const ed = {
+      ...parsed,
+      timestamp: Date.now(),
+      dateStr: new Date().toLocaleDateString("fr-CH", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
+    };
+
+    lSave(ed);
+    fbSave(ed);
+    renderEdition(ed);
+    renderHistory();
+    showToast(`✅ ${(parsed.produits||[]).length} nouveautés générées`);
+
+  } catch(e) {
+    clearInterval(ticker);
+    document.getElementById("journalLoading").style.display = "none";
+    document.getElementById("journalEmpty").style.display = "block";
+    document.getElementById("journalEmpty").innerHTML = `<div class="empty-icon">⚠️</div><div class="empty-title">Erreur</div><div class="empty-sub">${e.message}</div>`;
+    showToast("❌ " + e.message.slice(0, 60));
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = "🔄 Générer";
+};
+
+// ── RENDER ────────────────────────────────
+function renderEdition(ed) {
+  allProducts = ed.produits || [];
+  currentCat = "all";
+  document.getElementById("journalLoading").style.display = "none";
+  document.getElementById("journalEmpty").style.display = "none";
+  document.getElementById("j-edition").textContent = ed.dateStr || ed.edition || "";
+  const countEl = document.getElementById("j-count");
+  countEl.textContent = allProducts.length + " nouveautés";
+  countEl.style.display = "inline-block";
+  document.getElementById("filtersBar").style.display = "flex";
+  document.querySelectorAll(".f-chip").forEach(b => b.classList.toggle("active", b.dataset.cat === "all"));
+  renderCards();
+}
+
+function renderCards() {
+  const list = currentCat === "all" ? allProducts : allProducts.filter(p => (p.categorie||"").toLowerCase() === currentCat);
+  const el = document.getElementById("cardsList");
+  if (!list.length) { el.innerHTML = ""; document.getElementById("journalEmpty").style.display = "block"; return; }
+  document.getElementById("journalEmpty").style.display = "none";
+  el.innerHTML = list.map(p => {
+    const cat = (p.categorie||"général").toLowerCase().replace(/[éè]/g, "e");
+    const catClass = p.categorie?.toLowerCase() || "general";
+    return `<div class="card"><div class="card-body">
+      <div class="card-top">
+        <span class="cat-pill ${catClass}">${p.categorie||"général"}</span>
+        <div class="card-title">${p.titre||""}</div>
+      </div>
+      <div class="card-meta">${[p.marque, p.pays, p.date_lancement].filter(Boolean).join(" · ")}</div>
+      <div class="card-desc">${p.description||""}</div>
+      <div class="card-why">${p.interet||""}</div>
+    </div></div>`;
+  }).join("");
+}
+
+// ── HISTORY ───────────────────────────────
+window.renderHistory = async function() {
+  const fb = await fbHistory();
+  const items = fb || JSON.parse(localStorage.getItem("mw_history") || "[]");
+  window._hist = items;
+  const el = document.getElementById("historyList");
+  if (!items.length) { el.innerHTML = '<div class="history-empty">Aucune édition sauvegardée.</div>'; return; }
+  el.innerHTML = items.map((ed, i) => `
+    <div class="history-item" onclick="loadEdition(${i})">
+      <div>
+        <div class="history-item-date">${ed.dateStr || ed.edition || "Édition"}</div>
+        <div class="history-item-title">Canadian American Market</div>
+        <div class="history-item-count">${(ed.produits||[]).length} nouveautés</div>
+      </div>
+      <div class="history-chevron">›</div>
+    </div>`).join("");
+};
+
+window.loadEdition = function(i) {
+  const ed = window._hist?.[i];
+  if (ed) { renderEdition(ed); switchTab("journal"); }
+};
+
+// ── FILTERS ───────────────────────────────
+document.querySelectorAll(".f-chip").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".f-chip").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  currentCat = b.dataset.cat;
+  renderCards();
+}));
+
+// ── SETUP & SETTINGS ──────────────────────
+window.saveSetup = function() {
+  const apiKey = document.getElementById("setup-apikey").value.trim();
+  if (!apiKey) { showToast("❌ Clé API requise"); return; }
+  CONFIG = {
+    apiKey,
+    fbKey: document.getElementById("setup-fbkey").value.trim(),
+    fbProject: document.getElementById("setup-fbproject").value.trim()
+  };
+  localStorage.setItem("mw_config", JSON.stringify(CONFIG));
+  document.getElementById("mainTabs").style.display = "flex";
+  showView("journal");
+  updateSettingsDisplay();
+  if (CONFIG.fbKey && CONFIG.fbProject) initFirebase();
+  showToast("✅ Configuration sauvegardée");
+};
+
+window.changeApiKey = function() {
+  const k = prompt("Nouvelle clé API Anthropic :", "");
+  if (k?.trim()) {
+    CONFIG.apiKey = k.trim();
+    localStorage.setItem("mw_config", JSON.stringify(CONFIG));
+    updateSettingsDisplay();
+    showToast("✅ Clé mise à jour");
+  }
+};
+
+window.saveCount = function() {
+  localStorage.setItem("mw_count", document.getElementById("s-count").value);
+};
+
+window.clearHistory = function() {
+  if (confirm("Effacer tout l'historique local ?")) {
+    localStorage.removeItem("mw_history");
+    localStorage.removeItem("mw_last");
+    renderHistory();
+    showToast("🗑 Historique effacé");
+  }
+};
+
+window.resetAll = function() {
+  if (confirm("Réinitialiser complètement l'app ?")) { localStorage.clear(); location.reload(); }
+};
+
+function updateSettingsDisplay() {
+  if (CONFIG.apiKey) document.getElementById("s-apikey-status").textContent = "sk-ant-***" + CONFIG.apiKey.slice(-4) + " ✓";
+  if (CONFIG.fbProject) document.getElementById("s-firebase-status").textContent = CONFIG.fbProject;
+}
+
+// ── NAV ───────────────────────────────────
+window.showView = function(name) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById("view-" + name)?.classList.add("active");
+};
+
+window.switchTab = function(name) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  showView(name);
+  if (name === "history") renderHistory();
+};
+
+// ── TOAST ─────────────────────────────────
+window.showToast = function(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 2800);
+};
+
+init();
+</script>
+</body>
+</html>
