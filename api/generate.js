@@ -54,7 +54,7 @@ async function serperSearch(query, serperKey, num = 5) {
     const r = await fetch("https://google.serper.dev/search", {
       method: "POST",
       headers: { "X-API-KEY": serperKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ q: query, num, gl: "us" }),
+      body: JSON.stringify({ q: query, num: 3, gl: "us" }),
       signal: AbortSignal.timeout(5000)
     });
     if (!r.ok) return [];
@@ -82,14 +82,28 @@ async function serperImage(query, serperKey) {
 
 // ── Sources spécialisées ───────────────────
 const SOURCES = [
+  // Boissons
   "site:bevindustry.com new beverage launch 2026",
   "site:beveragedaily.com new drink product 2026",
   "site:fooddive.com new beverage launch 2026",
   "site:just-drinks.com new product launch 2026",
   "site:bevnet.com new product 2026",
   "site:sodaspectrum.com new soda 2026",
-  "new snack food launch USA Canada 2026",
-  "new candy beverage North America 2026"
+  // Snacks & confiserie
+  "site:snackfoodandwholesalebakery.com new product 2026",
+  "site:candyindustry.com new product launch 2026",
+  "site:progressivegrocer.com new snack product 2026",
+  "site:confectionerynews.com new candy launch 2026",
+  // Épicerie & retail
+  "site:foodbusinessnews.net new product 2026",
+  "site:supermarketnews.com new food product 2026",
+  "site:grocerydive.com new product launch 2026",
+  "site:foodprocessing.com new product 2026",
+  "site:foodindustryexecutive.com new product launch 2026",
+  // Général
+  "new snack candy chips launch USA Canada 2026",
+  "new condiment sauce grocery launch North America 2026",
+  "new protein bar health snack launch 2026"
 ];
 
 // ── Handler principal ──────────────────────
@@ -140,7 +154,7 @@ export default async function handler(req, res) {
 
 ${webContext ? `Actualités récentes (2025-2026) :\n${webContext}\n\n` : ""}${sinceText}
 
-Identifie 15 à 25 produits lancés en 2026 UNIQUEMENT pour Canadian American Market — épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
+Identifie le maximum de produits lancés en 2026 UNIQUEMENT (vise 25 à 40 produits répartis équitablement entre boissons, snacks, épicerie et tendances) pour Canadian American Market — épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
 
 RÈGLES STRICTES :
 - Date de lancement 2026 obligatoire et vérifiable
@@ -177,7 +191,7 @@ Réponds UNIQUEMENT avec du JSON valide, sans backticks :
     // 5. Images produits via Serper
     if (serperKey && products.length) {
       const imageUrls = await Promise.all(
-        products.map(p => serperImage(`${p.titre} ${p.marque} product packaging`, serperKey))
+        products.slice(0, 12).map(p => serperImage(`${p.titre} ${p.marque} product packaging`, serperKey))
       );
       parsedEdition.produits = products.map((p, i) => ({ ...p, image_url: imageUrls[i] || null }));
       products = parsedEdition.produits;
