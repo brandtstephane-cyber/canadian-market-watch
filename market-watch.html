@@ -358,12 +358,12 @@ let currentCat = "all";
 let db = null;
 
 // ── CLÉ API INTÉGRÉE ──────────────────────
-const BUILT_IN_API_KEY = "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";
+// Clé gérée côté serveur via /api/generate
 
 // ── INIT ──────────────────────────────────
 function init() {
   CONFIG = JSON.parse(localStorage.getItem("mw_config") || "{}");
-  CONFIG.apiKey = BUILT_IN_API_KEY;
+  // Clé côté serveur
   const count = localStorage.getItem("mw_count") || "15";
   const countEl = document.getElementById("s-count");
   if (countEl) countEl.value = count;
@@ -444,14 +444,9 @@ Réponds UNIQUEMENT avec un JSON valide, sans backticks ni texte autour :
 {"edition":"${today}","produits":[{"titre":"Nom complet","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases factuelles en français","interet":"1 phrase : pourquoi pertinent pour Vevey ou Genève"}]}`;
 
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("/api/generate", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": CONFIG.apiKey,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
         max_tokens: 3500,
