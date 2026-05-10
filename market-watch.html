@@ -511,12 +511,12 @@ window.generateJournal = async function() {
 
 Identifie ${count} nouveautés récentes du marché alimentaire nord-américain (2024-2025), réparties entre boissons, snacks, épicerie et tendances.
 
-Pour chaque produit, inclus aussi un mot-clé de recherche image en anglais (3-4 mots max, très spécifique au produit).
+IMPORTANT : Pour chaque produit, tu dois fournir une URL d'image directe et valide (jpg ou png) qui montre le PACKAGING OFFICIEL du produit — la vraie boîte, la vraie canette, le vrai sachet. Utilise les URLs officielles des marques ou de retailers connus (amazon, walmart, target, etc). L'URL doit être publiquement accessible. Exemple : https://m.media-amazon.com/images/I/...jpg
 
 Ces produits sont pour Canadian American Market, épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
 
 Réponds UNIQUEMENT avec un JSON valide, sans backticks :
-{"edition":"${today}","produits":[{"titre":"Nom complet","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases factuelles en français","interet":"1 phrase : pourquoi pertinent pour Vevey ou Genève","image_query":"english product search keywords"}]}`;
+{"edition":"${today}","produits":[{"titre":"Nom complet","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases factuelles en français","interet":"1 phrase : pourquoi pertinent pour Vevey ou Genève","image_url":"https://url-directe-image-produit.jpg"}]}`;
 
   try {
     const endpoint = "/api/generate";
@@ -567,22 +567,13 @@ function renderEdition(ed) {
   renderCards();
 }
 
-// Photos catégories (fallback si pas d image Google)
-const FALLBACK_PHOTOS = {
-  boissons: "1544145945-f90425340c7e",
-  snacks: "1528825871-8b63b82cbab6",
-  épicerie: "1504674900247-0877df9cc836",
-  tendances: "1542838132-92b1d7cd6a3a"
+// Couleurs de fond par catégorie (fallback si pas d image)
+const CAT_COLORS = {
+  boissons:  { bg: "linear-gradient(135deg,#0d3b6e,#1a5fa8)", accent: "#4db6ff" },
+  snacks:    { bg: "linear-gradient(135deg,#5c2d00,#a05000)", accent: "#ffb347" },
+  épicerie:  { bg: "linear-gradient(135deg,#0a3d1f,#1a6b35)", accent: "#5dde8a" },
+  tendances: { bg: "linear-gradient(135deg,#2d0a5c,#5a1fa0)", accent: "#c084fc" }
 };
-
-function getImageUrl(product, index) {
-  // Vraie photo Google si disponible
-  if (product.image_url) return product.image_url;
-  // Sinon fallback par catégorie
-  const cat = (product.categorie || "épicerie").toLowerCase();
-  const photoId = FALLBACK_PHOTOS[cat] || FALLBACK_PHOTOS["épicerie"];
-  return `https://images.unsplash.com/photo-${photoId}?w=600&h=300&fit=crop&q=80&auto=format`;
-}
 
 function renderCards() {
   const list = currentCat==="all" ? allProducts : allProducts.filter(p=>(p.categorie||"").toLowerCase()===currentCat);
@@ -593,11 +584,19 @@ function renderCards() {
     const cat = (p.categorie||"général").toLowerCase();
     const imgUrl = getImageUrl(p, i);
     const shareText = encodeURIComponent(`🍁 ${p.titre} — ${p.marque}\n${p.description}\n\nVia Canadian American Market`);
+    const colors = CAT_COLORS[cat] || CAT_COLORS["épicerie"];
+    const imgUrl = p.image_url || null;
     return `<div class="card" style="animation-delay:${Math.min(i*0.05,0.3)}s">
-      <div class="card-img-wrap">
-        <img class="card-img" src="${imgUrl}" alt="${p.titre}" loading="lazy" onerror="this.style.display='none'">
-        <div class="card-img-overlay"></div>
-        <span class="card-img-badge ${cat}">${p.categorie||"général"}</span>
+      <div class="card-img-wrap" style="${imgUrl ? "" : "background:"+colors.bg+";"}height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+        ${imgUrl ? `
+          <img src="${imgUrl}" alt="${p.titre}" loading="lazy"
+            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
+            onerror="this.parentElement.style.background='${colors.bg}';this.remove();this.parentElement.querySelector('.card-brand-name')?.style.setProperty('display','flex')">
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(13,13,13,0.85) 0%,rgba(0,0,0,0.1) 60%)"></div>
+        ` : `
+          <div class="card-brand-name" style="display:flex;font-family:var(--font-d);font-size:24px;color:${colors.accent};text-align:center;padding:1rem;z-index:2;text-shadow:0 2px 12px rgba(0,0,0,0.8)">${p.marque||p.titre}</div>
+        `}
+        <span class="card-img-badge ${cat}" style="position:absolute;top:10px;left:10px;z-index:3">${p.categorie||"général"}</span>
       </div>
       <div class="card-body">
         <div class="card-title">${p.titre||""}</div>
