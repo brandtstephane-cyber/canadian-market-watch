@@ -140,10 +140,16 @@ export default async function handler(req, res) {
 
 ${webContext ? `Actualités récentes (2025-2026) :\n${webContext}\n\n` : ""}${sinceText}
 
-Identifie 15 à 25 vraies nouveautés récentes (boissons, snacks, épicerie, tendances) pour Canadian American Market — épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
+Identifie 15 à 25 produits lancés en 2026 UNIQUEMENT pour Canadian American Market — épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
+
+RÈGLES STRICTES :
+- Date de lancement 2026 obligatoire et vérifiable
+- Rejette tout produit lancé avant janvier 2026
+- Rejette les reformulations ou nouvelles saveurs de gammes existantes depuis plus d'un an
+- Si tu n'es pas certain de la date, n'inclus pas le produit
 
 Réponds UNIQUEMENT avec du JSON valide, sans backticks :
-{"edition":"${today}","produits":[{"titre":"Nom","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases en français","interet":"1 phrase pour Genève/Vevey","source":"nom site"}]}`;
+{"edition":"${today}","produits":[{"titre":"Nom","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"mois 2026","description":"2-3 phrases en français","interet":"1 phrase pour Genève/Vevey","source":"nom site"}]}`;
 
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
