@@ -128,8 +128,11 @@ export default async function handler(req, res) {
     if (serperKey) {
       const results = await Promise.all(SOURCES.map(q => serperSearch(q, serperKey)));
       webContext = results.flat()
-        .map(i => `[${i.link}] ${i.title}: ${i.snippet}`)
-        .join("\n");
+        .slice(0, 20) // Max 20 résultats
+        .map(i => `- ${i.title}: ${(i.snippet||"").substring(0, 120)}`) // Pas d URL, pas de guillemets
+        .join("\n")
+        .replace(/[{}\[\]]/g, "") // Supprimer les caractères JSON
+        .substring(0, 3000); // Limiter à 3000 caractères max
     }
 
     // 3. Génération Claude
