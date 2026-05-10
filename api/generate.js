@@ -1,20 +1,3 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: "canadian-american-stock.firebaseapp.com",
-  projectId: process.env.FIREBASE_PROJECT_ID || "canadian-american-stock"
-};
-
-function getFirebaseDb() {
-  try {
-    const app = getApps().find(a => a.name === "mw") ||
-      initializeApp(firebaseConfig, "mw");
-    return getFirestore(app);
-  } catch(e) { return null; }
-}
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -24,31 +7,74 @@ export default async function handler(req, res) {
 
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const serperKey = process.env.SERPER_API_KEY;
+  const fbKey = process.env.FIREBASE_API_KEY;
+  const fbProject = process.env.FIREBASE_PROJECT_ID || "canadian-american-stock";
+
   if (!anthropicKey) return res.status(500).json({ error: "API key not configured" });
 
+  // Firebase REST helpers
+  const fbBase = `https://firestore.googleapis.com/v1/projects/${fbProject}/databases/(default)/documents`;
+
+  async function fbGet(path) {
+    if (!fbKey) return null;
+    try {
+      const r = await fetch(`${fbBase}/${path}?key=${fbKey}`);
+      if (!r.ok) return null;
+      return await r.json();
+    } catch(e) { return null; }
+  }
+
+  async function fbSet(path, data) {
+    if (!fbKey) return;
+    try {
+      const fields = {};
+      for (const [k, v] of Object.entries(data)) {
+        if (typeof v === "string") fields[k] = { stringValue: v };
+        else if (typeof v === "number") fields[k] = { integerValue: v };
+        else if (Array.isArray(v)) fields[k] = { arrayValue: { values: v.map(s => ({ stringValue: String(s) })) } };
+      }
+      await fetch(`${fbBase}/${path}?key=${fbKey}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields })
+      });
+    } catch(e) {}
+  }
+
+  async function fbAdd(collectionPath, data) {
+    if (!fbKey) return;
+    try {
+      const fields = {};
+      for (const [k, v] of Object.entries(data)) {
+        if (typeof v === "string") fields[k] = { stringValue: v };
+        else if (typeof v === "number") fields[k] = { integerValue: v };
+        else if (typeof v === "object" && v !== null) fields[k] = { stringValue: JSON.stringify(v) };
+      }
+      await fetch(`${fbBase}/${collectionPath}?key=${fbKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields })
+      });
+    } catch(e) {}
+  }
+
   try {
-    const count = req.body?.messages?.[0]?.content?.match(/Identifie (\d+)/)?.[1] || "15";
     const today = new Date().toLocaleDateString("fr-CA", { month: "long", year: "numeric" });
 
-    // 1. Récupérer la date du dernier journal depuis Firebase
+    // 1. Récupérer dernière date depuis Firebase
     let lastDate = null;
     let seenTitles = [];
-    const db = getFirebaseDb();
-    if (db) {
-      try {
-        const snap = await getDoc(doc(db, "market_watch_meta", "last_journal"));
-        if (snap.exists()) {
-          lastDate = snap.data().date;
-          seenTitles = snap.data().titles || [];
-        }
-      } catch(e) {}
+    const meta = await fbGet("market_watch_meta/last_journal");
+    if (meta?.fields) {
+      lastDate = meta.fields.date?.stringValue || null;
+      seenTitles = (meta.fields.titles?.arrayValue?.values || []).map(v => v.stringValue);
     }
 
     const sinceText = lastDate
-      ? `Cherche UNIQUEMENT les produits lancés ou annoncés APRÈS le ${lastDate}. Ne répète pas ces produits déjà vus : ${seenTitles.slice(0,20).join(", ")}.`
+      ? `Cherche UNIQUEMENT les produits lancés ou annoncés APRÈS le ${lastDate}. Ne répète pas : ${seenTitles.slice(0, 15).join(", ")}.`
       : "Cherche les produits les plus récents de 2025-2026.";
 
-    // 2. Recherche web via Serper sur les sources spécialisées
+    // 2. Recherche web via Serper
     const SOURCES = [
       "site:bevindustry.com new beverage launch 2026",
       "site:beveragedaily.com new drink product 2026",
@@ -57,7 +83,7 @@ export default async function handler(req, res) {
       "site:bevnet.com new product 2026",
       "site:sodaspectrum.com new soda 2026",
       "new snack food launch USA Canada 2026",
-      "new beverage drink launch North America 2026"
+      "new candy beverage North America spring 2026"
     ];
 
     let webContext = "";
@@ -72,9 +98,7 @@ export default async function handler(req, res) {
           });
           if (!r.ok) return "";
           const d = await r.json();
-          return (d.organic || []).slice(0, 3).map(i =>
-            `[${i.link}] ${i.title}: ${i.snippet}`
-          ).join("\n");
+          return (d.organic || []).slice(0, 3).map(i => `[${i.link}] ${i.title}: ${i.snippet}`).join("\n");
         } catch(e) { return ""; }
       });
       const results = await Promise.all(searchPromises);
@@ -88,7 +112,7 @@ ${webContext ? `Informations récentes trouvées sur le web :\n\n${webContext}\n
 
 ${sinceText}
 
-Identifie le MAXIMUM de vraies nouveautés récentes du marché alimentaire nord-américain (boissons, snacks, épicerie, tendances) — sans limite de nombre, remonte tout ce qui est nouveau depuis la dernière recherche.
+Identifie le MAXIMUM de vraies nouveautés du marché alimentaire nord-américain (boissons, snacks, épicerie, tendances) sans limite de nombre — remonte tout ce qui est nouveau.
 
 Ces produits sont pour Canadian American Market, épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
 
@@ -97,16 +121,8 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
 
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": anthropicKey,
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 6000,
-        messages: [{ role: "user", content: prompt }]
-      })
+      headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 6000, messages: [{ role: "user", content: prompt }] })
     });
 
     if (!claudeRes.ok) {
@@ -116,23 +132,16 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
 
     const claudeData = await claudeRes.json();
 
-    // 4. Parser les produits
+    // 4. Parser
     let products = [];
     let parsedEdition = {};
     try {
-      const raw = (claudeData.content || [])
-        .filter(b => b.type === "text").map(b => b.text).join("").trim()
-        .replace(/```json|```/g, "").trim();
+      const raw = (claudeData.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim().replace(/```json|```/g, "").trim();
       const match = raw.match(/\{[\s\S]*\}/);
-      if (match) {
-        parsedEdition = JSON.parse(match[0]);
-        products = parsedEdition.produits || [];
-      }
-    } catch(e) {
-      return res.status(200).json(claudeData);
-    }
+      if (match) { parsedEdition = JSON.parse(match[0]); products = parsedEdition.produits || []; }
+    } catch(e) { return res.status(200).json(claudeData); }
 
-    // 5. Images via Serper
+    // 5. Images
     if (serperKey && products.length) {
       const imagePromises = products.map(async (product) => {
         try {
@@ -151,29 +160,16 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
           return images[0]?.imageUrl || null;
         } catch(e) { return null; }
       });
-
       const imageUrls = await Promise.all(imagePromises);
       parsedEdition.produits = products.map((p, i) => ({ ...p, image_url: imageUrls[i] || null }));
     }
 
-    // 6. Sauvegarder la date et les titres dans Firebase
-    if (db && products.length) {
-      try {
-        const nowStr = new Date().toLocaleDateString("fr-CA", { day:"numeric", month:"long", year:"numeric" });
-        const newTitles = [...seenTitles, ...products.map(p => p.titre)].slice(-100);
-        await setDoc(doc(db, "market_watch_meta", "last_journal"), {
-          date: nowStr,
-          titles: newTitles,
-          count: products.length,
-          updatedAt: new Date().toISOString()
-        });
-        // Sauvegarder l'édition complète
-        await addDoc(collection(db, "market_watch_journals"), {
-          ...parsedEdition,
-          timestamp: Date.now(),
-          dateStr: new Date().toLocaleDateString("fr-CA", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
-        });
-      } catch(e) {}
+    // 6. Sauvegarder dans Firebase
+    if (fbKey && products.length) {
+      const nowStr = new Date().toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" });
+      const newTitles = [...seenTitles, ...products.map(p => p.titre)].slice(-100);
+      await fbSet("market_watch_meta/last_journal", { date: nowStr, titles: newTitles, count: products.length });
+      await fbAdd("market_watch_journals", { edition: parsedEdition.edition || today, count: products.length, timestamp: Date.now(), data: JSON.stringify(parsedEdition) });
     }
 
     parsedEdition.last_search_date = lastDate;
