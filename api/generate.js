@@ -112,7 +112,7 @@ ${webContext ? `Informations récentes trouvées sur le web :\n\n${webContext}\n
 
 ${sinceText}
 
-Identifie le MAXIMUM de vraies nouveautés du marché alimentaire nord-américain (boissons, snacks, épicerie, tendances) sans limite de nombre — remonte tout ce qui est nouveau.
+Identifie entre 15 et 25 vraies nouveautés récentes du marché alimentaire nord-américain (boissons, snacks, épicerie, tendances).
 
 Ces produits sont pour Canadian American Market, épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
 
@@ -122,7 +122,7 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 6000, messages: [{ role: "user", content: prompt }] })
+      body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 4000, messages: [{ role: "user", content: prompt }] })
     });
 
     if (!claudeRes.ok) {
@@ -136,10 +136,20 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
     let products = [];
     let parsedEdition = {};
     try {
-      const raw = (claudeData.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim().replace(/```json|```/g, "").trim();
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (match) { parsedEdition = JSON.parse(match[0]); products = parsedEdition.produits || []; }
-    } catch(e) { return res.status(200).json(claudeData); }
+      let raw = (claudeData.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim();
+      raw = raw.replace(/```json|```/g, "").trim();
+      // Trouver le JSON le plus proprement possible
+      const start = raw.indexOf("{");
+      const end = raw.lastIndexOf("}");
+      if (start !== -1 && end !== -1) {
+        const jsonStr = raw.substring(start, end + 1);
+        parsedEdition = JSON.parse(jsonStr);
+        products = parsedEdition.produits || [];
+      }
+    } catch(e) {
+      console.error("JSON parse error:", e.message);
+      return res.status(200).json(claudeData);
+    }
 
     // 5. Images
     if (serperKey && products.length) {
