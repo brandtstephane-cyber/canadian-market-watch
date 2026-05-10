@@ -357,23 +357,23 @@ let allProducts = [];
 let currentCat = "all";
 let db = null;
 
+// ── CLÉ API INTÉGRÉE ──────────────────────
+const BUILT_IN_API_KEY = "REMPLACER_PAR_TA_CLE_API";
+
 // ── INIT ──────────────────────────────────
 function init() {
   CONFIG = JSON.parse(localStorage.getItem("mw_config") || "{}");
+  CONFIG.apiKey = BUILT_IN_API_KEY;
   const count = localStorage.getItem("mw_count") || "15";
   const countEl = document.getElementById("s-count");
   if (countEl) countEl.value = count;
 
-  if (!CONFIG.apiKey) {
-    showView("setup");
-  } else {
-    document.getElementById("mainTabs").style.display = "flex";
-    showView("journal");
-    updateSettingsDisplay();
-    if (CONFIG.fbKey && CONFIG.fbProject) initFirebase();
-    const last = localStorage.getItem("mw_last");
-    if (last) try { renderEdition(JSON.parse(last)); } catch(e) {}
-  }
+  document.getElementById("mainTabs").style.display = "flex";
+  showView("journal");
+  updateSettingsDisplay();
+  if (CONFIG.fbKey && CONFIG.fbProject) initFirebase();
+  const last = localStorage.getItem("mw_last");
+  if (last) try { renderEdition(JSON.parse(last)); } catch(e) {}
 }
 
 // ── FIREBASE ──────────────────────────────
