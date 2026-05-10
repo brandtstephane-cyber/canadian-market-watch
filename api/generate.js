@@ -68,8 +68,8 @@ async function serperImage(query, serperKey) {
     const r = await fetch("https://google.serper.dev/images", {
       method: "POST",
       headers: { "X-API-KEY": serperKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ q: query, num: 3 }),
-      signal: AbortSignal.timeout(5000)
+      body: JSON.stringify({ q: query, num: 1 }),
+      signal: AbortSignal.timeout(3000)
     });
     if (!r.ok) return null;
     const d = await r.json();
@@ -82,28 +82,12 @@ async function serperImage(query, serperKey) {
 
 // ── Sources spécialisées ───────────────────
 const SOURCES = [
-  // Boissons
-  "site:bevindustry.com new beverage launch 2026",
-  "site:beveragedaily.com new drink product 2026",
-  "site:fooddive.com new beverage launch 2026",
-  "site:just-drinks.com new product launch 2026",
-  "site:bevnet.com new product 2026",
-  "site:sodaspectrum.com new soda 2026",
-  // Snacks & confiserie
+  "site:bevnet.com new product launch 2026",
+  "site:bevindustry.com new beverage 2026",
   "site:snackfoodandwholesalebakery.com new product 2026",
-  "site:candyindustry.com new product launch 2026",
-  "site:progressivegrocer.com new snack product 2026",
-  "site:confectionerynews.com new candy launch 2026",
-  // Épicerie & retail
-  "site:foodbusinessnews.net new product 2026",
+  "site:foodbusinessnews.net new product launch 2026",
   "site:supermarketnews.com new food product 2026",
-  "site:grocerydive.com new product launch 2026",
-  "site:foodprocessing.com new product 2026",
-  "site:foodindustryexecutive.com new product launch 2026",
-  // Général
-  "new snack candy chips launch USA Canada 2026",
-  "new condiment sauce grocery launch North America 2026",
-  "new protein bar health snack launch 2026"
+  "new snack beverage candy food launch USA Canada 2026"
 ];
 
 // ── Handler principal ──────────────────────
@@ -156,11 +140,13 @@ ${webContext ? `Actualités récentes (2025-2026) :\n${webContext}\n\n` : ""}${s
 
 Identifie le maximum de produits lancés en 2026 UNIQUEMENT (vise 25 à 40 produits répartis équitablement entre boissons, snacks, épicerie et tendances) pour Canadian American Market — épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
 
-RÈGLES STRICTES :
-- Date de lancement 2026 obligatoire et vérifiable
+RÈGLES STRICTES — RESPECTE-LES ABSOLUMENT :
+- Inclus UNIQUEMENT des produits réels dont tu peux confirmer le lancement en 2026
+- N'invente JAMAIS un produit, une marque ou une date — si tu n'es pas certain, exclus-le
 - Rejette tout produit lancé avant janvier 2026
-- Rejette les reformulations ou nouvelles saveurs de gammes existantes depuis plus d'un an
-- Si tu n'es pas certain de la date, n'inclus pas le produit
+- Rejette les anciens produits, reformulations mineures, ou extensions de gammes existantes
+- Il vaut mieux retourner 5 vrais produits que 20 inventés
+- Chaque produit doit être trouvable en ligne avec son vrai nom de marque
 
 Réponds UNIQUEMENT avec du JSON valide, sans backticks :
 {"edition":"${today}","produits":[{"titre":"Nom","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"mois 2026","description":"2-3 phrases en français","interet":"1 phrase pour Genève/Vevey","source":"nom site"}]}`;
@@ -191,7 +177,7 @@ Réponds UNIQUEMENT avec du JSON valide, sans backticks :
     // 5. Images produits via Serper
     if (serperKey && products.length) {
       const imageUrls = await Promise.all(
-        products.slice(0, 12).map(p => serperImage(`${p.titre} ${p.marque} product packaging`, serperKey))
+        products.map(p => serperImage(`${p.titre} ${p.marque} product packaging`, serperKey))
       );
       parsedEdition.produits = products.map((p, i) => ({ ...p, image_url: imageUrls[i] || null }));
       products = parsedEdition.produits;
