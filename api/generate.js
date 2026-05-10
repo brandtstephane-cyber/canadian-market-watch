@@ -1,3 +1,20 @@
+import { initializeApp, getApps } from "firebase/app";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: "canadian-american-stock.firebaseapp.com",
+  projectId: process.env.FIREBASE_PROJECT_ID || "canadian-american-stock"
+};
+
+function getFirebaseDb() {
+  try {
+    const app = getApps().find(a => a.name === "mw") ||
+      initializeApp(firebaseConfig, "mw");
+    return getFirestore(app);
+  } catch(e) { return null; }
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -13,7 +30,25 @@ export default async function handler(req, res) {
     const count = req.body?.messages?.[0]?.content?.match(/Identifie (\d+)/)?.[1] || "15";
     const today = new Date().toLocaleDateString("fr-CA", { month: "long", year: "numeric" });
 
-    // Sources spécialisées de Stéphane
+    // 1. Récupérer la date du dernier journal depuis Firebase
+    let lastDate = null;
+    let seenTitles = [];
+    const db = getFirebaseDb();
+    if (db) {
+      try {
+        const snap = await getDoc(doc(db, "market_watch_meta", "last_journal"));
+        if (snap.exists()) {
+          lastDate = snap.data().date;
+          seenTitles = snap.data().titles || [];
+        }
+      } catch(e) {}
+    }
+
+    const sinceText = lastDate
+      ? `Cherche UNIQUEMENT les produits lancés ou annoncés APRÈS le ${lastDate}. Ne répète pas ces produits déjà vus : ${seenTitles.slice(0,20).join(", ")}.`
+      : "Cherche les produits les plus récents de 2025-2026.";
+
+    // 2. Recherche web via Serper sur les sources spécialisées
     const SOURCES = [
       "site:bevindustry.com new beverage launch 2026",
       "site:beveragedaily.com new drink product 2026",
@@ -21,7 +56,7 @@ export default async function handler(req, res) {
       "site:just-drinks.com new product launch 2026",
       "site:bevnet.com new product 2026",
       "site:sodaspectrum.com new soda 2026",
-      "new snack food candy launch USA Canada 2026",
+      "new snack food launch USA Canada 2026",
       "new beverage drink launch North America 2026"
     ];
 
@@ -42,22 +77,23 @@ export default async function handler(req, res) {
           ).join("\n");
         } catch(e) { return ""; }
       });
-
       const results = await Promise.all(searchPromises);
       webContext = results.filter(Boolean).join("\n\n");
     }
 
-    // Générer avec Claude + contexte web
+    // 3. Générer avec Claude
     const prompt = `Tu es un expert en veille de marché pour les épiceries fines nord-américaines.
 
-${webContext ? `Voici des informations RÉCENTES (2025-2026) extraites de sources spécialisées :\n\n${webContext}\n\n` : ""}
+${webContext ? `Informations récentes trouvées sur le web :\n\n${webContext}\n\n` : ""}
 
-En te basant sur ces informations récentes, identifie ${count} vraies nouveautés (priorité absolue aux lancements 2025-2026) du marché alimentaire nord-américain : boissons, snacks, épicerie, tendances.
+${sinceText}
+
+Identifie le MAXIMUM de vraies nouveautés récentes du marché alimentaire nord-américain (boissons, snacks, épicerie, tendances) — sans limite de nombre, remonte tout ce qui est nouveau depuis la dernière recherche.
 
 Ces produits sont pour Canadian American Market, épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
 
 Réponds UNIQUEMENT avec JSON valide sans backticks :
-{"edition":"${today}","produits":[{"titre":"Nom","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases en français","interet":"1 phrase pour Genève/Vevey","source":"nom du site source"}]}`;
+{"edition":"${today}","produits":[{"titre":"Nom","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases en français","interet":"1 phrase pour Genève/Vevey","source":"nom site source"}]}`;
 
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -68,7 +104,7 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 4000,
+        max_tokens: 6000,
         messages: [{ role: "user", content: prompt }]
       })
     });
@@ -80,7 +116,7 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
 
     const claudeData = await claudeRes.json();
 
-    // Parser les produits
+    // 4. Parser les produits
     let products = [];
     let parsedEdition = {};
     try {
@@ -96,7 +132,7 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
       return res.status(200).json(claudeData);
     }
 
-    // Images via Serper
+    // 5. Images via Serper
     if (serperKey && products.length) {
       const imagePromises = products.map(async (product) => {
         try {
@@ -119,6 +155,28 @@ Réponds UNIQUEMENT avec JSON valide sans backticks :
       const imageUrls = await Promise.all(imagePromises);
       parsedEdition.produits = products.map((p, i) => ({ ...p, image_url: imageUrls[i] || null }));
     }
+
+    // 6. Sauvegarder la date et les titres dans Firebase
+    if (db && products.length) {
+      try {
+        const nowStr = new Date().toLocaleDateString("fr-CA", { day:"numeric", month:"long", year:"numeric" });
+        const newTitles = [...seenTitles, ...products.map(p => p.titre)].slice(-100);
+        await setDoc(doc(db, "market_watch_meta", "last_journal"), {
+          date: nowStr,
+          titles: newTitles,
+          count: products.length,
+          updatedAt: new Date().toISOString()
+        });
+        // Sauvegarder l'édition complète
+        await addDoc(collection(db, "market_watch_journals"), {
+          ...parsedEdition,
+          timestamp: Date.now(),
+          dateStr: new Date().toLocaleDateString("fr-CA", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
+        });
+      } catch(e) {}
+    }
+
+    parsedEdition.last_search_date = lastDate;
 
     return res.status(200).json({
       ...claudeData,
