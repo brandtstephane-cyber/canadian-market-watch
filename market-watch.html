@@ -2,224 +2,310 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#B22222">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d0d">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Market Watch — Canadian American Market</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --red: #B22222;
-  --red-dark: #8B0000;
-  --red-light: #f9eded;
-  --black: #111;
-  --gray-700: #444;
-  --gray-500: #777;
-  --gray-300: #ccc;
-  --gray-100: #f5f5f5;
-  --white: #fff;
-  --border: 1px solid #e0e0e0;
-  --radius: 8px;
-  --font-d: 'Playfair Display', Georgia, serif;
-  --font-b: 'Source Sans 3', system-ui, sans-serif;
-  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  --red: #C0392B;
+  --red2: #E74C3C;
+  --gold: #D4A017;
+  --gold2: #F0C040;
+  --dark: #0d0d0d;
+  --dark2: #141414;
+  --dark3: #1c1c1c;
+  --dark4: #242424;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0ede8;
+  --text2: #a09a92;
+  --text3: #5a5550;
+  --font-d: 'DM Serif Display', Georgia, serif;
+  --font-b: 'Karla', system-ui, sans-serif;
+  --r: 16px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-b); background: #f0ede8; color: var(--black); min-height: 100vh; }
+html { scroll-behavior: smooth; }
 
-/* TOPBAR */
+body {
+  font-family: var(--font-b);
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR ── */
 .topbar {
-  background: var(--red); color: white;
-  padding: 0 1rem; height: 54px;
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(13,13,13,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: env(safe-area-inset-top, 0) 0 0;
+}
+.topbar-inner {
   display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  padding: 0 1.25rem; height: 56px;
 }
-.topbar-logo { font-family: var(--font-d); font-size: 16px; font-weight: 700; line-height: 1.2; }
-.topbar-logo small { display: block; font-family: var(--font-b); font-size: 10px; font-weight: 300; opacity: 0.75; letter-spacing: 1.5px; text-transform: uppercase; }
-.topbar-right { display: flex; gap: 6px; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-leaf { font-size: 22px; line-height: 1; }
+.logo-text { line-height: 1.1; }
+.logo-name { font-family: var(--font-d); font-size: 15px; color: var(--text); letter-spacing: -0.2px; }
+.logo-sub { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); }
+.topbar-right { display: flex; gap: 6px; align-items: center; }
 .icon-btn {
-  background: rgba(255,255,255,0.15); border: none; color: white;
-  width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
-  font-size: 17px; display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s;
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: var(--dark3); cursor: pointer; color: var(--text2);
+  font-size: 16px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
 }
-.icon-btn:hover { background: rgba(255,255,255,0.28); }
+.icon-btn:hover { background: var(--dark4); color: var(--text); }
 
-/* TABS */
+/* ── TABS ── */
 .tabs {
-  display: flex; background: white; border-bottom: var(--border);
-  padding: 0 1rem; position: sticky; top: 54px; z-index: 99;
+  display: flex; background: rgba(13,13,13,0.85);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1rem; gap: 0; overflow-x: auto; scrollbar-width: none;
 }
-.tab-btn {
-  padding: 12px 16px; border: none; background: transparent;
-  font-family: var(--font-b); font-size: 13px; font-weight: 500;
-  color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent;
-  margin-bottom: -1px; transition: all 0.15s; white-space: nowrap;
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 0 16px; height: 44px; border: none; background: transparent;
+  font-family: var(--font-b); font-size: 13px; font-weight: 600;
+  color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+  letter-spacing: 0.2px;
 }
-.tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
 
-/* VIEWS */
+/* ── VIEWS ── */
 .view { display: none; }
 .view.active { display: block; }
 
-/* ── SETUP ── */
-.setup-wrap { max-width: 480px; margin: 2rem auto; padding: 0 1rem 2rem; }
-.setup-card { background: white; border-radius: 14px; padding: 1.75rem; box-shadow: var(--shadow); }
-.setup-title { font-family: var(--font-d); font-size: 22px; color: var(--red); margin-bottom: 0.4rem; }
-.setup-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 1.5rem; line-height: 1.6; }
-.form-group { margin-bottom: 1.1rem; }
-.form-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray-700); margin-bottom: 5px; }
-.form-input {
-  width: 100%; padding: 9px 12px; border: var(--border); border-radius: var(--radius);
-  font-size: 14px; font-family: var(--font-b); background: var(--gray-100); transition: border-color 0.15s;
+/* ── HERO HEADER ── */
+.journal-hero {
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
 }
-.form-input:focus { outline: none; border-color: var(--red); background: white; }
-.form-input.mono { font-family: monospace; font-size: 12px; }
-.form-hint { font-size: 11px; color: var(--gray-500); margin-top: 4px; line-height: 1.5; }
-.form-hint a { color: var(--red); }
-.btn-primary {
-  width: 100%; padding: 12px; background: var(--red); color: white; border: none;
-  border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer;
-  font-family: var(--font-b); transition: background 0.15s; margin-top: 0.5rem;
+.hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 1rem; }
+.hero-left {}
+.hero-date { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); margin-bottom: 4px; }
+.hero-title { font-family: var(--font-d); font-size: 26px; line-height: 1.1; color: var(--text); }
+.hero-count {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--red); color: white; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px; margin-top: 8px; letter-spacing: 0.3px;
 }
-.btn-primary:hover { background: var(--red-dark); }
-.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-.setup-divider { border: none; border-top: var(--border); margin: 1.25rem 0; }
-
-/* ── JOURNAL ── */
-.journal-header {
-  background: white; padding: 1rem; border-bottom: var(--border);
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-}
-.journal-meta { flex: 1; min-width: 0; }
-.journal-edition { font-size: 11px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
-.journal-title { font-family: var(--font-d); font-size: 16px; font-weight: 600; margin-top: 1px; }
-.journal-count { font-size: 11px; background: var(--red-light); color: var(--red); padding: 2px 8px; border-radius: 20px; font-weight: 600; display: inline-block; margin-top: 3px; }
 .gen-btn {
-  display: flex; align-items: center; gap: 6px; padding: 9px 18px;
-  background: var(--red); color: white; border: none; border-radius: 24px;
-  font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-b);
-  transition: background 0.15s; white-space: nowrap; flex-shrink: 0;
+  display: flex; align-items: center; gap: 7px; padding: 10px 20px;
+  background: linear-gradient(135deg, var(--red), var(--red2));
+  color: white; border: none; border-radius: 24px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: var(--font-b); transition: all 0.2s;
+  white-space: nowrap; flex-shrink: 0; letter-spacing: 0.3px;
+  box-shadow: 0 4px 20px rgba(192,57,43,0.35);
 }
-.gen-btn:hover { background: var(--red-dark); }
-.gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.gen-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(192,57,43,0.5); }
+.gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-.filters-bar {
-  display: flex; gap: 6px; padding: 0.7rem 1rem;
-  overflow-x: auto; background: white; border-bottom: var(--border); scrollbar-width: none;
+/* ── FILTERS ── */
+.filters {
+  display: flex; gap: 6px; padding: 0.75rem 1.25rem;
+  overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border);
 }
-.filters-bar::-webkit-scrollbar { display: none; }
-.f-chip {
-  padding: 4px 13px; border-radius: 20px; border: 1px solid var(--gray-300);
-  background: transparent; font-size: 12px; font-weight: 500; color: var(--gray-700);
-  cursor: pointer; white-space: nowrap; font-family: var(--font-b); transition: all 0.12s; flex-shrink: 0;
+.filters::-webkit-scrollbar { display: none; }
+.fchip {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid var(--dark4);
+  background: var(--dark3); font-size: 12px; font-weight: 600; color: var(--text2);
+  cursor: pointer; white-space: nowrap; font-family: var(--font-b);
+  transition: all 0.15s; flex-shrink: 0; letter-spacing: 0.2px;
 }
-.f-chip.active { background: var(--red); color: white; border-color: var(--red); }
+.fchip.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+.fchip:hover:not(.active) { border-color: var(--text3); color: var(--text); }
 
-.content-wrap { padding: 1rem; max-width: 680px; margin: 0 auto; }
+/* ── CONTENT ── */
+.content { padding: 1.25rem; max-width: 720px; margin: 0 auto; }
 
-.empty-state { text-align: center; padding: 3rem 1rem; }
-.empty-icon { font-size: 44px; margin-bottom: 1rem; opacity: 0.2; }
-.empty-title { font-family: var(--font-d); font-size: 20px; color: var(--gray-700); margin-bottom: 0.5rem; }
-.empty-sub { font-size: 13px; color: var(--gray-500); line-height: 1.7; }
+/* ── STATES ── */
+.empty-state { text-align: center; padding: 4rem 1rem; }
+.empty-icon { font-size: 48px; margin-bottom: 1rem; opacity: 0.15; }
+.empty-title { font-family: var(--font-d); font-size: 22px; color: var(--text2); margin-bottom: 0.5rem; }
+.empty-sub { font-size: 14px; color: var(--text3); line-height: 1.7; max-width: 280px; margin: 0 auto; }
 
-.loading-state { text-align: center; padding: 3rem 1rem; }
-.loader-ring {
-  width: 38px; height: 38px; border: 3px solid var(--gray-300);
-  border-top-color: var(--red); border-radius: 50%;
-  animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
+.loading-state { text-align: center; padding: 4rem 1rem; }
+.loading-pulse {
+  display: flex; gap: 6px; justify-content: center; margin-bottom: 1.5rem;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 14px; color: var(--gray-500); }
-.loading-sub { font-size: 12px; color: var(--gray-300); margin-top: 4px; }
-
-/* Cards */
-.cards-list { display: flex; flex-direction: column; gap: 10px; }
-.card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-.card-body { padding: 1rem; }
-.card-top { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 5px; }
-.cat-pill {
-  font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 700;
-  letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; margin-top: 3px;
+.pulse-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--red);
+  animation: pulse 1.2s ease-in-out infinite;
 }
-.cat-pill.boissons { background: #deeeff; color: #1a5a9e; }
-.cat-pill.snacks { background: #fff0d6; color: #7a4500; }
-.cat-pill.épicerie { background: #dff3e3; color: #1a6630; }
-.cat-pill.tendances { background: #f0ecff; color: #4a2d9e; }
-.card-title { font-family: var(--font-d); font-size: 15px; font-weight: 600; line-height: 1.35; }
-.card-meta { font-size: 12px; color: var(--gray-500); margin-bottom: 7px; }
-.card-desc { font-size: 13px; color: var(--gray-700); line-height: 1.6; margin-bottom: 8px; }
+.pulse-dot:nth-child(2) { animation-delay: 0.2s; background: var(--gold); }
+.pulse-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.loading-text { font-size: 14px; color: var(--text2); font-weight: 500; }
+.loading-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+/* ── CARDS ── */
+.cards-grid { display: flex; flex-direction: column; gap: 14px; }
+
+.card {
+  background: var(--dark2);
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: fadeUp 0.4s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.15s; }
+.card:nth-child(4) { animation-delay: 0.2s; }
+.card:nth-child(5) { animation-delay: 0.25s; }
+.card:nth-child(n+6) { animation-delay: 0.3s; }
+
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+
+.card-img {
+  width: 100%; height: 200px; object-fit: cover;
+  display: block; background: var(--dark3);
+  position: relative;
+}
+.card-img-wrap { position: relative; overflow: hidden; }
+.card-img-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
+  background: linear-gradient(to top, rgba(13,13,13,0.9), transparent);
+}
+.card-img-badge {
+  position: absolute; top: 12px; left: 12px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  padding: 3px 9px; border-radius: 20px;
+}
+.card-img-badge.boissons { background: #1a5a9e; color: #7ec8ff; }
+.card-img-badge.snacks { background: #7a4500; color: #ffc56b; }
+.card-img-badge.épicerie { background: #1a6630; color: #7dde9e; }
+.card-img-badge.tendances { background: #4a2d9e; color: #c4b5fd; }
+
+.card-body { padding: 1rem 1.1rem 0.85rem; }
+.card-title { font-family: var(--font-d); font-size: 18px; line-height: 1.3; margin-bottom: 4px; color: var(--text); }
+.card-meta { font-size: 12px; color: var(--text3); margin-bottom: 10px; font-weight: 500; letter-spacing: 0.2px; }
+.card-desc { font-size: 13.5px; color: var(--text2); line-height: 1.65; margin-bottom: 10px; }
 .card-why {
-  background: var(--red-light); border-left: 3px solid var(--red);
-  padding: 7px 10px; border-radius: 0 6px 6px 0;
-  font-size: 12px; color: var(--red-dark); line-height: 1.5;
+  background: rgba(212,160,23,0.08); border-left: 2px solid var(--gold);
+  padding: 8px 12px; border-radius: 0 8px 8px 0;
+  font-size: 12px; color: var(--gold2); line-height: 1.55; margin-bottom: 10px;
 }
 .card-why::before { content: "💡 "; }
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 8px; border-top: 1px solid var(--border);
+}
+.card-country { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.share-btn {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--text3); background: none; border: none;
+  cursor: pointer; font-family: var(--font-b); font-weight: 600;
+  padding: 4px 0; transition: color 0.15s;
+}
+.share-btn:hover { color: var(--text); }
 
 /* ── HISTORY ── */
-.history-wrap { padding: 1rem; max-width: 680px; margin: 0 auto; }
-.history-title { font-family: var(--font-d); font-size: 18px; font-weight: 600; margin-bottom: 1rem; }
-.history-list { display: flex; flex-direction: column; gap: 8px; }
-.history-item {
-  background: white; border-radius: 10px; padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05); cursor: pointer;
+.hist-wrap { padding: 1.25rem; max-width: 720px; margin: 0 auto; }
+.hist-title { font-family: var(--font-d); font-size: 22px; margin-bottom: 1.25rem; }
+.hist-list { display: flex; flex-direction: column; gap: 8px; }
+.hist-item {
+  background: var(--dark2); border-radius: var(--r); padding: 1rem 1.1rem;
+  border: 1px solid var(--border); cursor: pointer;
   display: flex; align-items: center; justify-content: space-between;
-  transition: background 0.12s;
+  transition: all 0.15s;
 }
-.history-item:hover { background: var(--gray-100); }
-.history-item-date { font-size: 11px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
-.history-item-title { font-family: var(--font-d); font-size: 15px; font-weight: 600; margin-top: 2px; }
-.history-item-count { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
-.history-chevron { font-size: 20px; color: var(--gray-300); }
-.history-empty { text-align: center; padding: 2.5rem 1rem; color: var(--gray-500); font-size: 14px; }
+.hist-item:hover { border-color: var(--gold); background: var(--dark3); }
+.hist-date { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+.hist-name { font-family: var(--font-d); font-size: 16px; margin-top: 2px; }
+.hist-count { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.hist-arrow { font-size: 20px; color: var(--text3); }
+.hist-empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
 
 /* ── SETTINGS ── */
-.settings-wrap { max-width: 480px; margin: 1.5rem auto; padding: 0 1rem 2rem; }
-.settings-section { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
-.settings-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--red); margin-bottom: 1rem; }
-.settings-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 0; border-bottom: var(--border); gap: 12px;
-}
+.settings-wrap { max-width: 480px; margin: 1.5rem auto; padding: 0 1.25rem 2rem; }
+.settings-section { background: var(--dark2); border-radius: var(--r); padding: 1.25rem; border: 1px solid var(--border); margin-bottom: 1rem; }
+.settings-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--gold); margin-bottom: 1rem; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 12px; }
 .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
-.settings-row-label { font-size: 14px; color: var(--black); }
-.settings-row-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; }
-.btn-danger {
-  width: 100%; padding: 10px; background: transparent; color: #c00; border: 1px solid #f5c0c0;
-  border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer;
-  font-family: var(--font-b); transition: background 0.15s; margin-top: 0.5rem;
-}
-.btn-danger:hover { background: #fff0f0; }
+.settings-row-label { font-size: 14px; color: var(--text); }
+.settings-row-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.s-chip { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--dark4); background: var(--dark3); font-size: 12px; font-weight: 600; color: var(--text2); cursor: pointer; font-family: var(--font-b); transition: all 0.12s; }
+.s-chip:hover { border-color: var(--text3); color: var(--text); }
+.s-select { padding: 5px 8px; border-radius: 8px; border: 1px solid var(--dark4); background: var(--dark3); color: var(--text); font-size: 13px; font-family: var(--font-b); width: 70px; }
+.btn-danger { width: 100%; padding: 11px; background: transparent; color: #e55; border: 1px solid rgba(200,50,50,0.3); border-radius: var(--r); font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font-b); transition: all 0.15s; margin-top: 0.5rem; }
+.btn-danger:hover { background: rgba(200,50,50,0.1); }
 
-/* Toast */
+/* ── SETUP ── */
+.setup-wrap { max-width: 440px; margin: 2rem auto; padding: 0 1.25rem 2rem; }
+.setup-card { background: var(--dark2); border-radius: 20px; padding: 2rem; border: 1px solid var(--border); }
+.setup-logo { text-align: center; margin-bottom: 1.5rem; }
+.setup-logo-icon { font-size: 40px; margin-bottom: 0.5rem; }
+.setup-title { font-family: var(--font-d); font-size: 24px; color: var(--text); }
+.setup-sub { font-size: 13px; color: var(--text3); margin-bottom: 1.5rem; line-height: 1.6; }
+.form-group { margin-bottom: 1.1rem; }
+.form-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text2); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--dark4); border-radius: var(--r); font-size: 14px; font-family: var(--font-b); background: var(--dark3); color: var(--text); transition: border-color 0.15s; }
+.form-input:focus { outline: none; border-color: var(--gold); }
+.form-input::placeholder { color: var(--text3); }
+.form-input.mono { font-family: monospace; font-size: 12px; letter-spacing: 0.5px; }
+.form-hint { font-size: 11px; color: var(--text3); margin-top: 5px; line-height: 1.5; }
+.form-hint a { color: var(--gold); }
+.btn-primary { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--red), var(--red2)); color: white; border: none; border-radius: var(--r); font-size: 15px; font-weight: 700; cursor: pointer; font-family: var(--font-b); margin-top: 0.5rem; letter-spacing: 0.3px; box-shadow: 0 4px 20px rgba(192,57,43,0.3); transition: all 0.2s; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(192,57,43,0.45); }
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+/* ── TOAST ── */
 .toast {
-  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px);
-  background: #222; color: white; padding: 10px 20px; border-radius: 24px;
-  font-size: 13px; font-weight: 500; z-index: 999;
-  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
-  opacity: 0; pointer-events: none; white-space: nowrap;
+  position: fixed; bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--dark3); color: var(--text); border: 1px solid var(--border);
+  padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: 600;
+  z-index: 999; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  opacity: 0; pointer-events: none; white-space: nowrap; backdrop-filter: blur(10px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ── SPINNER ── */
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spinr 0.7s linear infinite; vertical-align: middle; }
+@keyframes spinr { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-logo">
-    Canadian American Market
-    <small>Market Watch</small>
-  </div>
-  <div class="topbar-right">
-    <button class="icon-btn" onclick="showView('settings')" title="Paramètres">⚙️</button>
+  <div class="topbar-inner">
+    <div class="logo">
+      <div class="logo-leaf">🍁</div>
+      <div class="logo-text">
+        <div class="logo-name">Canadian American Market</div>
+        <div class="logo-sub">Market Watch</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="showView('settings')" title="Paramètres">⚙️</button>
+    </div>
   </div>
 </div>
 
 <div class="tabs" id="mainTabs" style="display:none">
-  <button class="tab-btn active" data-tab="journal" onclick="switchTab('journal')">📰 Journal</button>
-  <button class="tab-btn" data-tab="history" onclick="switchTab('history')">🗂 Historique</button>
+  <button class="tab active" data-tab="journal" onclick="switchTab('journal')">📰 Journal</button>
+  <button class="tab" data-tab="history" onclick="switchTab('history')">🗂 Historique</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -228,18 +314,18 @@ body { font-family: var(--font-b); background: #f0ede8; color: var(--black); min
 <div class="view active" id="view-setup">
   <div class="setup-wrap">
     <div class="setup-card">
-      <div class="setup-title">🍁 Bienvenue</div>
-      <div class="setup-sub">Configure l'app une seule fois. Tes paramètres sont sauvegardés localement sur cet appareil.</div>
-
+      <div class="setup-logo">
+        <div class="setup-logo-icon">🍁</div>
+        <div class="setup-title">Bienvenue</div>
+      </div>
+      <div class="setup-sub">Configure l'app une seule fois. Tes paramètres sont sauvegardés sur cet appareil.</div>
       <div class="form-group">
         <label class="form-label">Clé API Anthropic *</label>
         <input type="password" class="form-input mono" id="setup-apikey" placeholder="sk-ant-api03-...">
-        <div class="form-hint">Disponible sur <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
+        <div class="form-hint">Sur <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
       </div>
-
-      <hr class="setup-divider">
-      <div class="setup-sub" style="margin-bottom:1rem">Optionnel : Firebase pour synchroniser l'historique entre tes appareils.</div>
-
+      <hr class="divider">
+      <div class="setup-sub" style="margin-bottom:1rem">Optionnel : Firebase pour synchroniser l'historique entre appareils.</div>
       <div class="form-group">
         <label class="form-label">Firebase API Key</label>
         <input type="text" class="form-input mono" id="setup-fbkey" placeholder="AIza...">
@@ -247,55 +333,64 @@ body { font-family: var(--font-b); background: #f0ede8; color: var(--black); min
       <div class="form-group">
         <label class="form-label">Firebase Project ID</label>
         <input type="text" class="form-input" id="setup-fbproject" placeholder="mon-projet">
-        <div class="form-hint">Laisse vide pour garder l'historique uniquement sur cet appareil.</div>
+        <div class="form-hint">Laisse vide pour historique local uniquement.</div>
       </div>
-
-      <button class="btn-primary" id="setupBtn" onclick="saveSetup()">✅ Démarrer</button>
+      <button class="btn-primary" onclick="saveSetup()">✅ Démarrer</button>
     </div>
   </div>
 </div>
 
 <!-- JOURNAL -->
 <div class="view" id="view-journal">
-  <div class="journal-header">
-    <div class="journal-meta">
-      <div class="journal-edition" id="j-edition">—</div>
-      <div class="journal-title">Canadian American Market</div>
-      <span class="journal-count" id="j-count" style="display:none"></span>
+  <div class="journal-hero">
+    <div class="hero-top">
+      <div class="hero-left">
+        <div class="hero-date" id="j-date">—</div>
+        <div class="hero-title">Nouveautés<br>du marché</div>
+        <span class="hero-count" id="j-count" style="display:none">
+          <span id="j-count-num">0</span> produits sélectionnés
+        </span>
+      </div>
+      <button class="gen-btn" id="genBtn" onclick="generateJournal()">
+        🔄 Générer
+      </button>
     </div>
-    <button class="gen-btn" id="genBtn" onclick="generateJournal()">
-      🔄 Générer
-    </button>
   </div>
 
-  <div class="filters-bar" id="filtersBar" style="display:none">
-    <button class="f-chip active" data-cat="all">Tout</button>
-    <button class="f-chip" data-cat="boissons">🍶 Boissons</button>
-    <button class="f-chip" data-cat="snacks">🍿 Snacks</button>
-    <button class="f-chip" data-cat="épicerie">🛒 Épicerie</button>
-    <button class="f-chip" data-cat="tendances">📈 Tendances</button>
+  <div class="filters" id="filtersBar" style="display:none">
+    <button class="fchip active" data-cat="all">Tout</button>
+    <button class="fchip" data-cat="boissons">🍶 Boissons</button>
+    <button class="fchip" data-cat="snacks">🍿 Snacks</button>
+    <button class="fchip" data-cat="épicerie">🛒 Épicerie</button>
+    <button class="fchip" data-cat="tendances">📈 Tendances</button>
   </div>
 
-  <div class="content-wrap">
+  <div class="content">
     <div class="empty-state" id="journalEmpty">
       <div class="empty-icon">📰</div>
-      <div class="empty-title">Aucun journal généré</div>
-      <div class="empty-sub">Appuie sur <strong>Générer</strong> pour obtenir les dernières nouveautés du marché nord-américain, sélectionnées pour tes boutiques de Vevey et Genève Eaux-Vives.</div>
+      <div class="empty-title">Aucun journal</div>
+      <div class="empty-sub">Appuie sur Générer pour obtenir les dernières nouveautés du marché nord-américain pour Vevey & Genève.</div>
     </div>
     <div class="loading-state" id="journalLoading" style="display:none">
-      <div class="loader-ring"></div>
+      <div class="loading-pulse">
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
       <div class="loading-text" id="loadingText">Analyse du marché nord-américain…</div>
       <div class="loading-sub">10 à 20 secondes</div>
     </div>
-    <div class="cards-list" id="cardsList"></div>
+    <div class="cards-grid" id="cardsList"></div>
   </div>
 </div>
 
 <!-- HISTORY -->
 <div class="view" id="view-history">
-  <div class="history-wrap">
-    <div class="history-title">Éditions précédentes</div>
-    <div id="historyList"><div class="history-empty">Aucune édition sauvegardée.</div></div>
+  <div class="hist-wrap">
+    <div class="hist-title">Éditions précédentes</div>
+    <div class="hist-list" id="historyList">
+      <div class="hist-empty">Aucune édition sauvegardée.</div>
+    </div>
   </div>
 </div>
 
@@ -305,48 +400,34 @@ body { font-family: var(--font-b); background: #f0ede8; color: var(--black); min
     <div class="settings-section">
       <div class="settings-section-title">Configuration</div>
       <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Clé API Anthropic</div>
-          <div class="settings-row-sub" id="s-apikey-status">—</div>
-        </div>
-        <button class="f-chip" onclick="changeApiKey()">Modifier</button>
+        <div><div class="settings-row-label">Clé API</div><div class="settings-row-sub" id="s-apikey-status">—</div></div>
+        <button class="s-chip" onclick="changeApiKey()">Modifier</button>
       </div>
       <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Firebase</div>
-          <div class="settings-row-sub" id="s-firebase-status">Non connecté</div>
-        </div>
+        <div><div class="settings-row-label">Firebase</div><div class="settings-row-sub" id="s-firebase-status">Non connecté</div></div>
       </div>
       <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Magasins</div>
-          <div class="settings-row-sub">Vevey · Genève Eaux-Vives</div>
-        </div>
+        <div><div class="settings-row-label">Magasins</div><div class="settings-row-sub">Vevey · Genève Eaux-Vives</div></div>
       </div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Génération</div>
       <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Produits par journal</div>
-        </div>
-        <select class="form-input" style="width:70px;padding:5px 8px" id="s-count" onchange="saveCount()">
+        <div><div class="settings-row-label">Produits par journal</div></div>
+        <select class="s-select" id="s-count" onchange="localStorage.setItem('mw_count',this.value)">
           <option value="10">10</option>
           <option value="15" selected>15</option>
           <option value="20">20</option>
         </select>
       </div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Données</div>
       <button class="btn-danger" onclick="clearHistory()">🗑 Effacer l'historique local</button>
-      <button class="btn-danger" onclick="resetAll()" style="margin-top:8px;color:#888;border-color:#ddd">Réinitialiser l'app</button>
+      <button class="btn-danger" onclick="resetAll()" style="margin-top:8px;color:var(--text3);border-color:var(--border)">Réinitialiser l'app</button>
     </div>
-
     <div style="text-align:center;margin-top:1.5rem">
-      <button class="f-chip active" onclick="showView('journal');switchTab('journal')">← Retour</button>
+      <button class="s-chip" onclick="showView('journal');switchTab('journal')" style="padding:8px 20px">← Retour</button>
     </div>
   </div>
 </div>
@@ -357,10 +438,7 @@ let allProducts = [];
 let currentCat = "all";
 let db = null;
 
-// ── CLÉ API INTÉGRÉE ──────────────────────
-// Clé gérée côté serveur via /api/generate
-
-// ── INIT ──────────────────────────────────
+// ── INIT ──
 function init() {
   CONFIG = JSON.parse(localStorage.getItem("mw_config") || "{}");
   // Clé côté serveur
@@ -368,55 +446,55 @@ function init() {
   const countEl = document.getElementById("s-count");
   if (countEl) countEl.value = count;
 
+  // Si pas de clé config, on check si on a un proxy serveur
+  if (!CONFIG.apiKey) {
+    // Tester si le proxy existe (déployé sur Vercel)
+    fetch("/api/generate", { method: "OPTIONS" })
+      .then(() => {
+        // Proxy disponible, pas besoin de clé
+        CONFIG.useProxy = true;
+        localStorage.setItem("mw_config", JSON.stringify(CONFIG));
+        startApp();
+      })
+      .catch(() => {
+        showView("setup");
+      });
+  } else {
+    CONFIG.useProxy = true;
+    startApp();
+  }
+}
+
+function startApp() {
   document.getElementById("mainTabs").style.display = "flex";
   showView("journal");
   updateSettingsDisplay();
   if (CONFIG.fbKey && CONFIG.fbProject) initFirebase();
   const last = localStorage.getItem("mw_last");
   if (last) try { renderEdition(JSON.parse(last)); } catch(e) {}
+  // Date
+  document.getElementById("j-date").textContent = new Date().toLocaleDateString("fr-CH", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).toUpperCase();
 }
 
-// ── FIREBASE ──────────────────────────────
+// ── FIREBASE ──
 async function initFirebase() {
   try {
     const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
     const { getFirestore, collection, addDoc, getDocs, orderBy, query, limit } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-    const existing = getApps().find(a => a.name === "mw");
-    const app = existing || initializeApp({ apiKey: CONFIG.fbKey, projectId: CONFIG.fbProject, authDomain: `${CONFIG.fbProject}.firebaseapp.com` }, "mw");
+    const ex = getApps().find(a => a.name === "mw");
+    const app = ex || initializeApp({ apiKey: CONFIG.fbKey, projectId: CONFIG.fbProject, authDomain: `${CONFIG.fbProject}.firebaseapp.com` }, "mw");
     db = getFirestore(app);
     window._fb = { collection, addDoc, getDocs, orderBy, query, limit };
     document.getElementById("s-firebase-status").textContent = CONFIG.fbProject + " ✓";
   } catch(e) { console.warn("Firebase:", e.message); }
 }
 
-async function fbSave(ed) {
-  if (!db || !window._fb) return;
-  try { await window._fb.addDoc(window._fb.collection(db, "market_watch"), ed); } catch(e) {}
-}
-
-async function fbHistory() {
-  if (!db || !window._fb) return null;
-  try {
-    const { collection, getDocs, orderBy, query, limit } = window._fb;
-    const snap = await getDocs(query(collection(db, "market_watch"), orderBy("timestamp","desc"), limit(30)));
-    return snap.docs.map(d => d.data());
-  } catch(e) { return null; }
-}
-
-// ── LOCAL ─────────────────────────────────
-function lSave(ed) {
-  const h = JSON.parse(localStorage.getItem("mw_history") || "[]");
-  h.unshift(ed);
-  localStorage.setItem("mw_history", JSON.stringify(h.slice(0, 50)));
-  localStorage.setItem("mw_last", JSON.stringify(ed));
-}
-
-// ── GENERATE ──────────────────────────────
+// ── GENERATE ──
 window.generateJournal = async function() {
   const btn = document.getElementById("genBtn");
   const count = document.getElementById("s-count")?.value || localStorage.getItem("mw_count") || "15";
   btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.35);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px"></span>Génération…';
+  btn.innerHTML = '<span class="spin"></span> Génération…';
 
   document.getElementById("journalEmpty").style.display = "none";
   document.getElementById("cardsList").innerHTML = "";
@@ -424,209 +502,170 @@ window.generateJournal = async function() {
   document.getElementById("journalLoading").style.display = "block";
   document.getElementById("j-count").style.display = "none";
 
-  const loadMsgs = ["Analyse du marché nord-américain…", "Sélection des nouveautés…", "Évaluation pour Vevey & Genève…", "Finalisation du journal…"];
+  const msgs = ["Analyse du marché nord-américain…","Sélection des nouveautés…","Évaluation pour Vevey & Genève…","Finalisation du journal…"];
   let mi = 0;
-  const ticker = setInterval(() => {
-    document.getElementById("loadingText").textContent = loadMsgs[mi++ % loadMsgs.length];
-  }, 3500);
+  const ticker = setInterval(() => { document.getElementById("loadingText").textContent = msgs[mi++ % msgs.length]; }, 3500);
 
   const today = new Date().toLocaleDateString("fr-CH", { month:"long", year:"numeric" });
-
   const prompt = `Tu es un expert en veille de marché pour les épiceries fines nord-américaines.
 
 Identifie ${count} nouveautés récentes du marché alimentaire nord-américain (2024-2025), réparties entre boissons, snacks, épicerie et tendances.
 
-Ces produits sont pour Canadian American Market, épicerie fine spécialisée dans les produits canadiens et américains avec deux boutiques en Suisse : Vevey et Genève Eaux-Vives. Clientèle : expatriés nord-américains, amateurs de culture américaine/canadienne, Suisses curieux.
+Pour chaque produit, inclus aussi un mot-clé de recherche image en anglais (3-4 mots max, très spécifique au produit).
 
-Critères : authenticité marquée, originalité, importable en Europe (longue conservation, sans alcool ou clairement signalé), fort potentiel de vente.
+Ces produits sont pour Canadian American Market, épicerie fine à Vevey et Genève Eaux-Vives, Suisse.
 
-Réponds UNIQUEMENT avec un JSON valide, sans backticks ni texte autour :
-{"edition":"${today}","produits":[{"titre":"Nom complet","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases factuelles en français","interet":"1 phrase : pourquoi pertinent pour Vevey ou Genève"}]}`;
+Réponds UNIQUEMENT avec un JSON valide, sans backticks :
+{"edition":"${today}","produits":[{"titre":"Nom complet","marque":"Marque","pays":"Canada ou USA","categorie":"boissons","date_lancement":"saison année","description":"2-3 phrases factuelles en français","interet":"1 phrase : pourquoi pertinent pour Vevey ou Genève","image_query":"english product search keywords"}]}`;
 
   try {
-    const res = await fetch("/api/generate", {
+    const endpoint = "/api/generate";
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 3500,
-        messages: [{ role: "user", content: prompt }]
-      })
+      body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 3500, messages: [{ role: "user", content: prompt }] })
     });
 
     clearInterval(ticker);
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `Erreur ${res.status}`);
-    }
-
+    if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error?.message || `Erreur ${res.status}`); }
     const data = await res.json();
-    let raw = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim();
-    raw = raw.replace(/```json|```/g, "").trim();
-
-    // Extract JSON if wrapped in text
+    let raw = (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("").trim();
+    raw = raw.replace(/```json|```/g,"").trim();
     const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("Réponse JSON invalide");
+    if (!match) throw new Error("Réponse invalide");
     const parsed = JSON.parse(match[0]);
-
-    const ed = {
-      ...parsed,
-      timestamp: Date.now(),
-      dateStr: new Date().toLocaleDateString("fr-CH", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
-    };
-
-    lSave(ed);
-    fbSave(ed);
+    const ed = { ...parsed, timestamp: Date.now(), dateStr: new Date().toLocaleDateString("fr-CH",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) };
+    localStorage.setItem("mw_last", JSON.stringify(ed));
+    const hist = JSON.parse(localStorage.getItem("mw_history")||"[]");
+    hist.unshift(ed); localStorage.setItem("mw_history", JSON.stringify(hist.slice(0,50)));
+    if (db && window._fb) { try { await window._fb.addDoc(window._fb.collection(db,"market_watch"), ed); } catch(e){} }
     renderEdition(ed);
     renderHistory();
     showToast(`✅ ${(parsed.produits||[]).length} nouveautés générées`);
-
   } catch(e) {
     clearInterval(ticker);
     document.getElementById("journalLoading").style.display = "none";
     document.getElementById("journalEmpty").style.display = "block";
     document.getElementById("journalEmpty").innerHTML = `<div class="empty-icon">⚠️</div><div class="empty-title">Erreur</div><div class="empty-sub">${e.message}</div>`;
-    showToast("❌ " + e.message.slice(0, 60));
+    showToast("❌ " + e.message.slice(0,60));
   }
-
-  btn.disabled = false;
-  btn.innerHTML = "🔄 Générer";
+  btn.disabled = false; btn.innerHTML = "🔄 Générer";
 };
 
-// ── RENDER ────────────────────────────────
+// ── RENDER ──
 function renderEdition(ed) {
   allProducts = ed.produits || [];
   currentCat = "all";
   document.getElementById("journalLoading").style.display = "none";
   document.getElementById("journalEmpty").style.display = "none";
-  document.getElementById("j-edition").textContent = ed.dateStr || ed.edition || "";
-  const countEl = document.getElementById("j-count");
-  countEl.textContent = allProducts.length + " nouveautés";
-  countEl.style.display = "inline-block";
+  document.getElementById("j-date").textContent = (ed.dateStr||ed.edition||"").toUpperCase();
+  const cEl = document.getElementById("j-count");
+  document.getElementById("j-count-num").textContent = allProducts.length;
+  cEl.style.display = "inline-flex";
   document.getElementById("filtersBar").style.display = "flex";
-  document.querySelectorAll(".f-chip").forEach(b => b.classList.toggle("active", b.dataset.cat === "all"));
+  document.querySelectorAll(".fchip").forEach(b=>b.classList.toggle("active",b.dataset.cat==="all"));
   renderCards();
+}
+
+function getImageUrl(product) {
+  const query = encodeURIComponent(product.image_query || product.titre || "food product");
+  return `https://source.unsplash.com/600x300/?${query}`;
 }
 
 function renderCards() {
-  const list = currentCat === "all" ? allProducts : allProducts.filter(p => (p.categorie||"").toLowerCase() === currentCat);
+  const list = currentCat==="all" ? allProducts : allProducts.filter(p=>(p.categorie||"").toLowerCase()===currentCat);
   const el = document.getElementById("cardsList");
-  if (!list.length) { el.innerHTML = ""; document.getElementById("journalEmpty").style.display = "block"; return; }
+  if (!list.length) { el.innerHTML=""; document.getElementById("journalEmpty").style.display="block"; return; }
   document.getElementById("journalEmpty").style.display = "none";
-  el.innerHTML = list.map(p => {
-    const cat = (p.categorie||"général").toLowerCase().replace(/[éè]/g, "e");
-    const catClass = p.categorie?.toLowerCase() || "general";
-    return `<div class="card"><div class="card-body">
-      <div class="card-top">
-        <span class="cat-pill ${catClass}">${p.categorie||"général"}</span>
-        <div class="card-title">${p.titre||""}</div>
+  el.innerHTML = list.map((p,i) => {
+    const cat = (p.categorie||"général").toLowerCase();
+    const imgUrl = getImageUrl(p);
+    const shareText = encodeURIComponent(`🍁 ${p.titre} — ${p.marque}\n${p.description}\n\nVia Canadian American Market`);
+    return `<div class="card" style="animation-delay:${Math.min(i*0.05,0.3)}s">
+      <div class="card-img-wrap">
+        <img class="card-img" src="${imgUrl}" alt="${p.titre}" loading="lazy" onerror="this.style.display='none'">
+        <div class="card-img-overlay"></div>
+        <span class="card-img-badge ${cat}">${p.categorie||"général"}</span>
       </div>
-      <div class="card-meta">${[p.marque, p.pays, p.date_lancement].filter(Boolean).join(" · ")}</div>
-      <div class="card-desc">${p.description||""}</div>
-      <div class="card-why">${p.interet||""}</div>
-    </div></div>`;
+      <div class="card-body">
+        <div class="card-title">${p.titre||""}</div>
+        <div class="card-meta">${[p.marque,p.date_lancement].filter(Boolean).join(" · ")}</div>
+        <div class="card-desc">${p.description||""}</div>
+        <div class="card-why">${p.interet||""}</div>
+        <div class="card-footer">
+          <span class="card-country">${p.pays||""}</span>
+          <button class="share-btn" onclick="shareProduct('${p.titre?.replace(/'/g,"\\'")||""}','${(p.description||"").replace(/'/g,"\\'").substring(0,100)}')">
+            ↗ Partager
+          </button>
+        </div>
+      </div>
+    </div>`;
   }).join("");
 }
 
-// ── HISTORY ───────────────────────────────
+window.shareProduct = function(titre, desc) {
+  const text = `🍁 ${titre}\n${desc}\n\nVia Canadian American Market — Market Watch`;
+  if (navigator.share) {
+    navigator.share({ title: titre, text }).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(text).then(()=>showToast("📋 Copié !")).catch(()=>{});
+  }
+};
+
+// ── HISTORY ──
 window.renderHistory = async function() {
-  const fb = await fbHistory();
-  const items = fb || JSON.parse(localStorage.getItem("mw_history") || "[]");
+  let items = [];
+  if (db && window._fb) {
+    try { const { collection, getDocs, orderBy, query, limit } = window._fb; const snap = await getDocs(query(window._fb.collection(db,"market_watch"),orderBy("timestamp","desc"),limit(30))); items = snap.docs.map(d=>d.data()); } catch(e){}
+  }
+  if (!items.length) items = JSON.parse(localStorage.getItem("mw_history")||"[]");
   window._hist = items;
   const el = document.getElementById("historyList");
-  if (!items.length) { el.innerHTML = '<div class="history-empty">Aucune édition sauvegardée.</div>'; return; }
-  el.innerHTML = items.map((ed, i) => `
-    <div class="history-item" onclick="loadEdition(${i})">
+  if (!items.length) { el.innerHTML='<div class="hist-empty">Aucune édition sauvegardée.</div>'; return; }
+  el.innerHTML = items.map((ed,i)=>`
+    <div class="hist-item" onclick="loadEdition(${i})">
       <div>
-        <div class="history-item-date">${ed.dateStr || ed.edition || "Édition"}</div>
-        <div class="history-item-title">Canadian American Market</div>
-        <div class="history-item-count">${(ed.produits||[]).length} nouveautés</div>
+        <div class="hist-date">${ed.dateStr||ed.edition||"Édition"}</div>
+        <div class="hist-name">Canadian American Market</div>
+        <div class="hist-count">${(ed.produits||[]).length} nouveautés</div>
       </div>
-      <div class="history-chevron">›</div>
+      <div class="hist-arrow">›</div>
     </div>`).join("");
 };
 
-window.loadEdition = function(i) {
-  const ed = window._hist?.[i];
-  if (ed) { renderEdition(ed); switchTab("journal"); }
-};
+window.loadEdition = function(i) { const ed = window._hist?.[i]; if(ed){renderEdition(ed);switchTab("journal");} };
 
-// ── FILTERS ───────────────────────────────
-document.querySelectorAll(".f-chip").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll(".f-chip").forEach(x => x.classList.remove("active"));
-  b.classList.add("active");
-  currentCat = b.dataset.cat;
-  renderCards();
+// ── FILTERS ──
+document.querySelectorAll(".fchip").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".fchip").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active"); currentCat=b.dataset.cat; renderCards();
 }));
 
-// ── SETUP & SETTINGS ──────────────────────
+// ── SETUP & SETTINGS ──
 window.saveSetup = function() {
   const apiKey = document.getElementById("setup-apikey").value.trim();
   if (!apiKey) { showToast("❌ Clé API requise"); return; }
-  CONFIG = {
-    apiKey,
-    fbKey: document.getElementById("setup-fbkey").value.trim(),
-    fbProject: document.getElementById("setup-fbproject").value.trim()
-  };
+  CONFIG = { apiKey, fbKey: document.getElementById("setup-fbkey").value.trim(), fbProject: document.getElementById("setup-fbproject").value.trim(), useProxy: true };
   localStorage.setItem("mw_config", JSON.stringify(CONFIG));
-  document.getElementById("mainTabs").style.display = "flex";
-  showView("journal");
-  updateSettingsDisplay();
+  startApp();
   if (CONFIG.fbKey && CONFIG.fbProject) initFirebase();
   showToast("✅ Configuration sauvegardée");
 };
 
-window.changeApiKey = function() {
-  const k = prompt("Nouvelle clé API Anthropic :", "");
-  if (k?.trim()) {
-    CONFIG.apiKey = k.trim();
-    localStorage.setItem("mw_config", JSON.stringify(CONFIG));
-    updateSettingsDisplay();
-    showToast("✅ Clé mise à jour");
-  }
-};
-
-window.saveCount = function() {
-  localStorage.setItem("mw_count", document.getElementById("s-count").value);
-};
-
-window.clearHistory = function() {
-  if (confirm("Effacer tout l'historique local ?")) {
-    localStorage.removeItem("mw_history");
-    localStorage.removeItem("mw_last");
-    renderHistory();
-    showToast("🗑 Historique effacé");
-  }
-};
-
-window.resetAll = function() {
-  if (confirm("Réinitialiser complètement l'app ?")) { localStorage.clear(); location.reload(); }
-};
+window.changeApiKey = function() { const k=prompt("Nouvelle clé API :",""); if(k?.trim()){CONFIG.apiKey=k.trim();localStorage.setItem("mw_config",JSON.stringify(CONFIG));updateSettingsDisplay();showToast("✅ Clé mise à jour");} };
+window.clearHistory = function() { if(confirm("Effacer l'historique local ?")){localStorage.removeItem("mw_history");localStorage.removeItem("mw_last");renderHistory();showToast("🗑 Effacé");} };
+window.resetAll = function() { if(confirm("Réinitialiser l'app ?")){localStorage.clear();location.reload();} };
 
 function updateSettingsDisplay() {
-  if (CONFIG.apiKey) document.getElementById("s-apikey-status").textContent = "sk-ant-***" + CONFIG.apiKey.slice(-4) + " ✓";
+  if (CONFIG.apiKey) document.getElementById("s-apikey-status").textContent = "Configurée ✓";
+  else document.getElementById("s-apikey-status").textContent = "Via proxy serveur ✓";
   if (CONFIG.fbProject) document.getElementById("s-firebase-status").textContent = CONFIG.fbProject;
 }
 
-// ── NAV ───────────────────────────────────
-window.showView = function(name) {
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  document.getElementById("view-" + name)?.classList.add("active");
-};
-
-window.switchTab = function(name) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
-  showView(name);
-  if (name === "history") renderHistory();
-};
-
-// ── TOAST ─────────────────────────────────
-window.showToast = function(msg) {
-  const el = document.getElementById("toast");
-  el.textContent = msg; el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 2800);
-};
+// ── NAV ──
+window.showView = function(n) { document.querySelectorAll(".view").forEach(v=>v.classList.remove("active")); document.getElementById("view-"+n)?.classList.add("active"); };
+window.switchTab = function(n) { document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===n)); showView(n); if(n==="history")renderHistory(); };
+window.showToast = function(msg) { const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),2800); };
 
 init();
 </script>
