@@ -441,28 +441,12 @@ let db = null;
 // ── INIT ──
 function init() {
   CONFIG = JSON.parse(localStorage.getItem("mw_config") || "{}");
-  // Clé côté serveur
   const count = localStorage.getItem("mw_count") || "15";
   const countEl = document.getElementById("s-count");
   if (countEl) countEl.value = count;
-
-  // Si pas de clé config, on check si on a un proxy serveur
-  if (!CONFIG.apiKey) {
-    // Tester si le proxy existe (déployé sur Vercel)
-    fetch("/api/generate", { method: "OPTIONS" })
-      .then(() => {
-        // Proxy disponible, pas besoin de clé
-        CONFIG.useProxy = true;
-        localStorage.setItem("mw_config", JSON.stringify(CONFIG));
-        startApp();
-      })
-      .catch(() => {
-        showView("setup");
-      });
-  } else {
-    CONFIG.useProxy = true;
-    startApp();
-  }
+  // Toujours démarrer directement — clé gérée côté serveur via /api/generate
+  CONFIG.useProxy = true;
+  startApp();
 }
 
 function startApp() {
