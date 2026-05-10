@@ -567,15 +567,21 @@ function renderEdition(ed) {
   renderCards();
 }
 
+// Photos catégories (fallback si pas d image Google)
+const FALLBACK_PHOTOS = {
+  boissons: "1544145945-f90425340c7e",
+  snacks: "1528825871-8b63b82cbab6",
+  épicerie: "1504674900247-0877df9cc836",
+  tendances: "1542838132-92b1d7cd6a3a"
+};
+
 function getImageUrl(product, index) {
-  const query = (product.image_query || product.titre || "food snack")
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, "")
-    .trim()
-    .split(" ")
-    .slice(0, 3)
-    .join(",");
-  return `https://loremflickr.com/600/300/${encodeURIComponent(query)}?lock=${index || 0}`;
+  // Vraie photo Google si disponible
+  if (product.image_url) return product.image_url;
+  // Sinon fallback par catégorie
+  const cat = (product.categorie || "épicerie").toLowerCase();
+  const photoId = FALLBACK_PHOTOS[cat] || FALLBACK_PHOTOS["épicerie"];
+  return `https://images.unsplash.com/photo-${photoId}?w=600&h=300&fit=crop&q=80&auto=format`;
 }
 
 function renderCards() {
