@@ -370,7 +370,7 @@ function renderCards() {
         <div class="card-desc">${p.description||""}</div>
         <div class="card-why">${p.interet||""}</div>
         <div class="card-footer">
-          <span class="card-country">${p.pays||""}</span>
+          <span class="card-country">${p.pays||""}${p.source ? " · <span style='color:var(--gold);font-size:10px;text-transform:none'>" + p.source + "</span>" : ""}</span>
           <button class="share-btn" onclick="shareProduct('${(p.titre||"").replace(/'/g,"\\'")}','${(p.description||"").replace(/'/g,"\\'").substring(0,100)}')">↗ Partager</button>
         </div>
       </div>
