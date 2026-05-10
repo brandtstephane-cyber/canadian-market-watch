@@ -6,9 +6,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const googleKey = process.env.GOOGLE_SEARCH_KEY;
-  const googleCx = process.env.GOOGLE_SEARCH_CX;
-
+  const serperKey = process.env.SERPER_API_KEY;
   if (!anthropicKey) return res.status(500).json({ error: "API key not configured" });
 
   try {
@@ -29,71 +27,57 @@ export default async function handler(req, res) {
     }
 
     const claudeData = await claudeRes.json();
+    if (!serperKey) return res.status(200).json(claudeData);
 
-    // 2. Si pas de clé Google, retourner sans images
-    if (!googleKey || !googleCx) {
-      return res.status(200).json(claudeData);
-    }
-
-    // 3. Extraire les produits du JSON retourné
+    // 2. Parser les produits
     let products = [];
+    let parsedEdition = {};
     try {
       const raw = (claudeData.content || [])
         .filter(b => b.type === "text").map(b => b.text).join("").trim()
         .replace(/```json|```/g, "").trim();
       const match = raw.match(/\{[\s\S]*\}/);
       if (match) {
-        const parsed = JSON.parse(match[0]);
-        products = parsed.produits || [];
+        parsedEdition = JSON.parse(match[0]);
+        products = parsedEdition.produits || [];
       }
     } catch(e) {
-      // Si parse échoue, retourner sans images
       return res.status(200).json(claudeData);
     }
 
-    // 4. Chercher une image pour chaque produit (en parallèle, max 10)
-    const imagePromises = products.slice(0, 20).map(async (product) => {
-      const query = encodeURIComponent(`${product.titre} ${product.marque} product`);
+    // 3. Chercher images via Serper en parallèle
+    const imagePromises = products.map(async (product) => {
+      const query = `${product.titre} ${product.marque} product packaging`;
       try {
-        const imgRes = await fetch(
-          `https://www.googleapis.com/customsearch/v1?key=${googleKey}&cx=${googleCx}&q=${query}&searchType=image&num=1&imgSize=medium&safe=active`,
-          { signal: AbortSignal.timeout(4000) }
-        );
+        const imgRes = await fetch("https://google.serper.dev/images", {
+          method: "POST",
+          headers: { "X-API-KEY": serperKey, "Content-Type": "application/json" },
+          body: JSON.stringify({ q: query, num: 3 }),
+          signal: AbortSignal.timeout(5000)
+        });
         if (!imgRes.ok) return null;
         const imgData = await imgRes.json();
-        return imgData.items?.[0]?.link || null;
-      } catch(e) {
-        return null;
-      }
+        const images = imgData.images || [];
+        for (const img of images) {
+          if (img.imageUrl && img.imageUrl.match(/\.(jpg|jpeg|png|webp)/i)) {
+            return img.imageUrl;
+          }
+        }
+        return images[0]?.imageUrl || null;
+      } catch(e) { return null; }
     });
 
-    const images = await Promise.all(imagePromises);
+    const imageUrls = await Promise.all(imagePromises);
 
-    // 5. Injecter les images dans les produits
-    products = products.map((p, i) => ({
+    parsedEdition.produits = products.map((p, i) => ({
       ...p,
-      image_url: images[i] || null
+      image_url: imageUrls[i] || null
     }));
 
-    // 6. Reconstruire la réponse Claude avec les images ajoutées
-    const originalText = (claudeData.content || [])
-      .filter(b => b.type === "text").map(b => b.text).join("").trim()
-      .replace(/```json|```/g, "").trim();
-
-    const match = originalText.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        const parsed = JSON.parse(match[0]);
-        parsed.produits = products;
-        const enriched = JSON.stringify(parsed);
-        return res.status(200).json({
-          ...claudeData,
-          content: [{ type: "text", text: enriched }]
-        });
-      } catch(e) {}
-    }
-
-    return res.status(200).json(claudeData);
+    return res.status(200).json({
+      ...claudeData,
+      content: [{ type: "text", text: JSON.stringify(parsedEdition) }]
+    });
 
   } catch(e) {
     return res.status(500).json({ error: e.message });
